@@ -23,6 +23,7 @@ public class BlackJackGame implements BlackJackGameI {
             humanPlayer.getHand().addCard(deck.dealCard());
             humanAction = humanPlayer.nextAction(botPlayer.getHand());
         }
+        // TODO remove this logic, doesn't seem that that bot will change action based on human action
         if (humanAction.equals(Action.Stay) || humanAction.equals(Action.Busted)) {
             while (botAction.equals(Action.Hit)) {
                 botPlayer.getHand().addCard(deck.dealCard());
