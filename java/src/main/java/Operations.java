@@ -2,9 +2,12 @@ import enumerations.Action;
 
 import java.util.List;
 
-public class Operations {
+public class Operations implements OperationsI {
 
-    public DeckI initialGameDeal(BotPlayer botPlayer, HumanPlayer humanPlayer) throws OutOfCardsException {
+    private Integer blackJackWin = 21;
+
+    @Override
+    public DeckI initialGameDeal(PlayerI botPlayer, PlayerI humanPlayer) throws OutOfCardsException {
         DeckI deck = Dependencies.deck.make();
         deck.shuffleDeck(Dependencies.now.make().getTime());
         for (int i = 0; i < 2; i++) {
@@ -14,7 +17,9 @@ public class Operations {
         return deck;
     }
 
-    public Action handlePlayerAction(PlayerI player, PlayerI otherPlayer, DeckI deck) throws OutOfCardsException {
+    @Override
+    public Action handlePlayerAction(PlayerI player, PlayerI otherPlayer) throws OutOfCardsException{
+        DeckI deck = initialGameDeal(player, otherPlayer);
         Action action = player.nextAction(otherPlayer.getHand());
         while (action.equals(Action.Hit)) {
             player.getHand().addCard(deck.dealCard());
@@ -23,8 +28,33 @@ public class Operations {
         return action;
     }
 
-    public String determineWinner(PlayerI botPlayer, PlayerI humanPlayer){
+    @Override
+    public Integer getScore(PlayerI player){
         ScoreI score = Dependencies.score.make();
-        return null;
+        return score.scoreHand(player.getHand().getCards());
+    }
+
+    @Override
+    public boolean gameIsPush(Integer botScore, Integer humanScore){
+        return botScore == humanScore;
+    }
+
+    @Override
+    public boolean bothPlayersBust(Action playerAction, Action otherAction){
+        return playerAction.equals(Action.Busted) && otherAction.equals(Action.Busted);
+    }
+
+    @Override
+    public String determineWinner(Integer botScore, Integer humanScore){
+        boolean hWithinBJ = humanScore <= blackJackWin;
+        boolean bWithinBJ = botScore <= blackJackWin;
+        boolean hWins = humanScore > botScore;
+
+        if (hWins && hWithinBJ){
+            return "Human wins the game with " + humanScore + " bot loses with " + botScore;
+        } else if (!hWins && bWithinBJ){
+            return "Bot wins the game with " + botScore + " human loses with " + humanScore;
+        }
+        return "";
     }
 }

@@ -5,45 +5,21 @@ public class BlackJackGame implements BlackJackGameI {
     // FIXME break out logic into operations helper method
     @Override
     public String play() throws OutOfCardsException {
-        DeckI deck = Dependencies.deck.make();
-        deck.shuffleDeck(Dependencies.now.make().getTime());
+        OperationsI gameOps = Dependencies.gameOps.make();
         PlayerI botPlayer = Dependencies.botPlayer.make();
         PlayerI humanPlayer = Dependencies.humanPlayer.make();
-        ScoreI score = Dependencies.score.make();
-        for (int i = 0; i < 2; i++) {
-            botPlayer.getHand().addCard(deck.dealCard());
-            humanPlayer.getHand().addCard(deck.dealCard());
-        }
 
-        // human player actions
-        Action humanAction = humanPlayer.nextAction(botPlayer.getHand());
-        Action botAction = botPlayer.nextAction(humanPlayer.getHand());
+        Action humanAction = gameOps.handlePlayerAction(humanPlayer, botPlayer);
+        Action botAction = gameOps.handlePlayerAction(botPlayer, humanPlayer);
 
-        while (humanAction.equals(Action.Hit)) {
-            humanPlayer.getHand().addCard(deck.dealCard());
-            humanAction = humanPlayer.nextAction(botPlayer.getHand());
-        }
-        // TODO remove this logic, doesn't seem that that bot will change action based on human action
-        if (humanAction.equals(Action.Stay) || humanAction.equals(Action.Busted)) {
-            while (botAction.equals(Action.Hit)) {
-                botPlayer.getHand().addCard(deck.dealCard());
-                botAction = botPlayer.nextAction(humanPlayer.getHand());
-            }
-        }
-        Integer botScore = score.scoreHand(botPlayer.getHand().getCards());
-        Integer humanScore = score.scoreHand(humanPlayer.getHand().getCards());
-        if (humanAction.equals(Action.Busted) && botAction.equals(Action.Busted)) {
-            return "No one wins this game, both players busted. Human score " + humanScore + " Bot score " + botScore;
-        }
-        if (humanScore <= 21 && (humanScore > botScore || botAction.equals(Action.Busted))) {
-            return "Human player wins the game with " + humanScore + " Bot loses with " + botScore;
-        }
-        if (botScore == humanScore) {
-            return "Game is a draw at " + botScore;
-        }
+        Integer botScore = gameOps.getScore(botPlayer);
+        Integer humanScore = gameOps.getScore(humanPlayer);
 
-         return "Bot player wins the game with " + botScore + " Human loses with " + humanScore;
+        if (gameOps.bothPlayersBust(botAction, humanAction)) {
+            return "Both players bust at (" + botScore + ") bot and (" + humanScore + ")";
+        } else if (gameOps.gameIsPush(botScore, humanScore)) {
+            return "Game is a push at " + humanScore;
+        }
+        return gameOps.determineWinner(botScore, humanScore);
     }
-
-
 }

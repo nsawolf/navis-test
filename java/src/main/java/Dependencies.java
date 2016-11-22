@@ -1,8 +1,6 @@
-import com.oracle.webservices.internal.api.databinding.Databinding;
 import navis.injection.BuildFunction;
 import navis.injection.InstanceFactory;
 
-import javax.swing.text.html.HTMLDocument;
 import java.util.Date;
 
 
@@ -17,6 +15,8 @@ public class Dependencies {
             new InstanceFactory<HandI>(BuildFunction.singletonBuilder(Hand.class));
     public static final InstanceFactory<Date> now =
             new InstanceFactory<>(() -> new Date(System.currentTimeMillis()));
+    public static final InstanceFactory<OperationsI> gameOps =
+            new InstanceFactory<OperationsI>(BuildFunction.singletonBuilder(Operations.class));
     public static final InstanceFactory<PlayerI> botPlayer =
             new InstanceFactory<PlayerI>(BuildFunction.singletonBuilder(BotPlayer.class));
     public static final InstanceFactory<PlayerI> humanPlayer =
