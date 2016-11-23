@@ -1,49 +1,73 @@
+import enumerations.Rank;
+import enumerations.Suit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 public class OperationsTest {
 
-    private Operations gameOps;
     private Deck mockedDeck = mock(Deck.class);
+    private Hand mockedHand = mock(Hand.class);
     private HumanPlayer mockedHumanPlayer = mock(HumanPlayer.class);
     private BotPlayer mockedBotPlayer = mock(BotPlayer.class);
     private Score mockedScore = mock(Score.class);
+    private Date mockedDateSeed = mock(Date.class);
+    private Long mockedTimeValue = 23L;
+    private Card eightDiamonds = new Card(Suit.Diamonds, Rank.Eight);
+    private Card tenHearts = new Card(Suit.Hearts, Rank.Ten);
+    private Card threeSpades = new Card(Suit.Spades, Rank.Three);
+    private Card aceClubs = new Card(Suit.Clubs, Rank.Ace);
+    private Operations gameOps = new Operations();
 
     @Before
     public void setup(){
-        Dependencies.gameOps.make();
+        Dependencies.hand.override(() -> mockedHand);
         Dependencies.deck.override(() -> mockedDeck);
         Dependencies.humanPlayer.override (() -> mockedHumanPlayer);
         Dependencies.botPlayer.override(() -> mockedBotPlayer);
         Dependencies.score.override(() -> mockedScore);
+        Dependencies.now.override(() -> mockedDateSeed);
     }
 
     @After
     public void tearDown(){
-        Dependencies.gameOps.close();
         Dependencies.deck.close();
         Dependencies.humanPlayer.close();
         Dependencies.botPlayer.close();
         Dependencies.score.close();
+        Dependencies.now.close();
+        Dependencies.gameOps.close();
     }
 
     @Test
-    public void handles_initial_game_deal() throws OutOfCardsException {
-        DeckI result = gameOps.initialGameDeal(mockedBotPlayer, mockedHumanPlayer);
+    public void initialGameDeal_shuffles_and_deals_cards() throws OutOfCardsException {
+        when(mockedDateSeed.getTime()).thenReturn(mockedTimeValue);
+        when(mockedDeck.dealCard()).thenReturn(eightDiamonds).thenReturn(threeSpades).thenReturn(aceClubs).thenReturn(tenHearts);
+        when(mockedBotPlayer.getHand()).thenReturn(mockedHand);
+        when(mockedHumanPlayer.getHand()).thenReturn(mockedHand);
+        gameOps.initialGameDeal(mockedBotPlayer, mockedHumanPlayer);
 
-        assertEquals(result.size(), 48);
-
-        verify(mockedHumanPlayer, times(2)).getHand();
-        verify(mockedBotPlayer, times(2)).getHand();
         verify(mockedDeck, times(4)).dealCard();
         verify(mockedDeck, times(1)).shuffleDeck(anyLong());
+    }
+
+    @Test
+    public void player_gets_card_dealt_to_hand() throws OutOfCardsException{
+        when(mockedDeck.dealCard()).thenReturn(eightDiamonds);
+        when(mockedBotPlayer.getHand()).thenReturn(mockedHand);
+
+        gameOps.dealCardToPlayer(mockedDeck, mockedBotPlayer);
+
+        verify(mockedBotPlayer, times(1)).getHand().addCard(any(Card.class));
     }
 }

@@ -49,7 +49,18 @@ public class PromptTests {
     }
 
     @Test
-    public void io_exception_returns_the_default() throws IOException{
+    public void whitespace_is_trimmed_from_input() throws IOException {
+        PromptI prompt = Dependencies.prompt.make();
+        when(console.getConsoleInput()).thenReturn("  trim whitespaces off  ");
+
+        String result = prompt.prompt("A test question", "(.*)(\\w+)(.*)", "Default Response");
+
+        assumeTrue(result.equals("trim whitespaces off"));
+//        verify(console, times(1)).getConsoleInput();
+    }
+
+    @Test
+    public void io_exception_returns_the_default() throws IOException {
         PromptI prompt = Dependencies.prompt.make();
         when(console.getConsoleInput()).thenThrow(new IOException("testing io exception"));
 
@@ -58,17 +69,5 @@ public class PromptTests {
         assumeTrue(result.equals("Default Response"));
         verify(console, times(1)).getConsoleInput();
         verify(console, times(1)).generateConsoleOutput(anyString());
-    }
-
-    @Test
-    public void whitespace_is_trimmed_from_input() throws IOException {
-        PromptI prompt = Dependencies.prompt.make();
-        when(console.getConsoleInput()).thenReturn("  trim whitespaces off  ");
-
-        String result = prompt.prompt("A test question", "(.*)(\\w+)(.*)", "Default Response");
-
-        assumeTrue(result.equals("trim whitespaces off"));
-        verify(console, times(1)).getConsoleInput();
-        verify(console, times(1)).generateConsoleOutput(anyString(), anyString(), anyString());
     }
 }

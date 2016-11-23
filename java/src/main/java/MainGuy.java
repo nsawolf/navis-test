@@ -5,7 +5,7 @@ public class MainGuy {
     public static void main(String[] args){
         BlackJackGameI game = Dependencies.game.make();
         ConsoleIOI console = Dependencies.console.make();
-        console.generateConsoleOutput("Let us begin the game.  Cards have been shuffled and dealt.");
+        console.generateConsoleOutput("Let us begin the game.\n  Cards have been shuffled and dealt.\n");
         try{
             String result = game.play();
             console.generateConsoleOutput(result);

@@ -8,17 +8,17 @@ public class BlackJackGame implements BlackJackGameI {
         OperationsI gameOps = Dependencies.gameOps.make();
         PlayerI botPlayer = Dependencies.botPlayer.make();
         PlayerI humanPlayer = Dependencies.humanPlayer.make();
-
-        Action humanAction = gameOps.handlePlayerAction(humanPlayer, botPlayer);
-        Action botAction = gameOps.handlePlayerAction(botPlayer, humanPlayer);
+        DeckI deck = gameOps.initialGameDeal(botPlayer, humanPlayer);
+        Action humanAction = gameOps.handlePlayerAction(humanPlayer, botPlayer, deck);
+        Action botAction = gameOps.handlePlayerAction(botPlayer, humanPlayer, deck);
 
         Integer botScore = gameOps.getScore(botPlayer);
         Integer humanScore = gameOps.getScore(humanPlayer);
 
         if (gameOps.bothPlayersBust(botAction, humanAction)) {
-            return "Both players bust at (" + botScore + ") bot and (" + humanScore + ")";
+            return "Both players bust at (" + botScore + ") bot and (" + humanScore + ")\n";
         } else if (gameOps.gameIsPush(botScore, humanScore)) {
-            return "Game is a push at " + humanScore;
+            return "Game is a push at " + humanScore +"\n";
         }
         return gameOps.determineWinner(botScore, humanScore);
     }
