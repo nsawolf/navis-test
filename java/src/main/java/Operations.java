@@ -11,7 +11,7 @@ public class Operations implements OperationsI {
     @Override
     public DeckI initialGameDeal(PlayerI botPlayer, PlayerI humanPlayer) throws OutOfCardsException {
         DeckI deck = Dependencies.deck.make();
-        deck.shuffleDeck(Dependencies.now.make().getTime());
+        deck.shuffleDeck();
         for (int i = 0; i < 2; i++) {
             dealCardToPlayer(deck, botPlayer);
             dealCardToPlayer(deck, humanPlayer);

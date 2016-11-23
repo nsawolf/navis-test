@@ -1,5 +1,7 @@
 import enumerations.Rank;
 import enumerations.Suit;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -10,6 +12,18 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class DeckTests {
+
+    private Long mockedTimeValue = 23L;
+
+    @Before
+    public void setup(){
+        Dependencies.now.override(() -> mockedTimeValue);
+    }
+
+    @After
+    public void teardown(){
+        Dependencies.now.close();
+    }
 
     @Test
     public void starts_in_rank_suit_order(){
@@ -54,18 +68,19 @@ public class DeckTests {
     @Test
     public void is_shuffled_cards_in_different_order(){
         Deck deck = new Deck();
-        deck.shuffleDeck(10L);
 
-        assertEquals(deck.cardDeck.get(0), new Card(Suit.Spades, Rank.Five));
-        assertEquals(deck.cardDeck.get(1), new Card(Suit.Diamonds, Rank.Jack));
-        assertEquals(deck.cardDeck.get(2), new Card(Suit.Diamonds, Rank.Four));
-        assertEquals(deck.cardDeck.get(3), new Card(Suit.Clubs, Rank.Seven));
+        deck.shuffleDeck();
+
+        assertEquals(deck.cardDeck.get(0), new Card(Suit.Spades, Rank.Ace));
+        assertEquals(deck.cardDeck.get(1), new Card(Suit.Spades, Rank.King));
+        assertEquals(deck.cardDeck.get(2), new Card(Suit.Diamonds, Rank.Ten));
+        assertEquals(deck.cardDeck.get(3), new Card(Suit.Spades, Rank.Six));
     }
 
     @Test
     public void is_shuffled_no_cards_are_lost(){
         Deck deck = new Deck();
-        deck.shuffleDeck(10L);
+        deck.shuffleDeck();
         HashSet<Card>s_deck = new HashSet<Card>();
         s_deck.addAll(deck.cardDeck);
         assertEquals(52, s_deck.size());
@@ -77,7 +92,7 @@ public class DeckTests {
         HashSet<Card> original_deck = new HashSet<Card>();
         original_deck.addAll(deck.cardDeck);
 
-        deck.shuffleDeck(10L);
+        deck.shuffleDeck();
         HashSet<Card> shuffle_deck = new HashSet<Card>();
         shuffle_deck.addAll(deck.cardDeck);
         assertTrue(original_deck.equals(shuffle_deck));

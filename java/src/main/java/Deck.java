@@ -20,8 +20,8 @@ public class Deck implements DeckI {
     }
 
     @Override
-    public void shuffleDeck(Long seed){
-        Collections.shuffle(cardDeck, new Random(seed));
+    public void shuffleDeck(){
+        Collections.shuffle(cardDeck, new Random(Dependencies.now.make()));
     }
 
     @Override

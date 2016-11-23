@@ -13,10 +13,10 @@ import static org.mockito.Mockito.*;
 
 public class BlackjackGameTests {
 
+    private OperationsI mockedOps = mock(Operations.class);
     private Deck mockedDeck = mock(Deck.class);
     private PlayerI mockedBot = mock(BotPlayer.class);
     private PlayerI mockedHuman = mock(HumanPlayer.class);
-    private Hand mockedHand = mock(Hand.class);
     private Score mockedScore = mock(Score.class);
     private BlackJackGame game = new BlackJackGame();
     private Integer scoreUnder21 = 20;
@@ -26,6 +26,7 @@ public class BlackjackGameTests {
 
     @Before
     public void setup(){
+        Dependencies.gameOps.override(() -> mockedOps);
         Dependencies.deck.override(() -> mockedDeck);
         Dependencies.botPlayer.override(() -> mockedBot);
         Dependencies.humanPlayer.override(() -> mockedHuman);
@@ -35,6 +36,7 @@ public class BlackjackGameTests {
 
     @After
     public void teardown(){
+        Dependencies.gameOps.close();
         Dependencies.deck.close();
         Dependencies.botPlayer.close();
         Dependencies.humanPlayer.close();
@@ -44,158 +46,99 @@ public class BlackjackGameTests {
 
     @Test
     public void human_player_wins_when_bot_busts() throws OutOfCardsException{
-        Card card1 = new Card(Suit.Clubs, Rank.Nine);
-        Card card2 = new Card(Suit.Hearts, Rank.Jack);
-        mockedHand.addCard(card1);
-        mockedHand.addCard(card2);
-        when(mockedDeck.dealCard()).thenReturn(new Card(Suit.Clubs, Rank.Nine));
-        when(mockedHuman.getHand()).thenReturn(mockedHand);
-        when(mockedBot.getHand()).thenReturn(mockedHand);
-        when(mockedHuman.nextAction(any(Hand.class))).thenReturn(Action.Hit).thenReturn(Action.Stay);
-        when(mockedBot.nextAction(any(Hand.class))).thenReturn(Action.Hit).thenReturn(Action.Busted);
-        when(mockedScore.scoreHand(anySet())).thenReturn(scoreOver21).thenReturn(scoreUnder21);
+        mocked_deal_cards_get_actions();
+        when(mockedOps.getScore(any(PlayerI.class))).thenReturn(scoreOver21).thenReturn(scoreAtStay);
+        when(mockedOps.determineWinner(anyInt(), anyInt())).thenReturn("Human player wins the game with " + scoreUnder21 + " Bot loses with " + scoreOver21);
 
         String result = game.play();
 
-        assertEquals(result, "Human player wins the game with " + scoreUnder21 + " Bot loses with " + scoreOver21);
-        verify(mockedHuman, times(2)).nextAction(any(Hand.class));
-        verify(mockedBot, times(2)).nextAction(any(Hand.class));
-        verify(mockedScore, times(2)).scoreHand(anySet());
-        verify(mockedDeck, times(6)).dealCard();
+        assertTrue(result.contains(scoreUnder21.toString()) && result.contains(scoreOver21.toString()));
     }
 
     @Test
     public void bot_player_wins_when_human_busts() throws OutOfCardsException{
-        Card card1 = new Card(Suit.Clubs, Rank.Nine);
-        Card card2 = new Card(Suit.Hearts, Rank.Jack);
-        mockedHand.addCard(card1);
-        mockedHand.addCard(card2);
-        when(mockedDeck.dealCard()).thenReturn(new Card(Suit.Clubs, Rank.Nine));
-        when(mockedHuman.getHand()).thenReturn(mockedHand);
-        when(mockedBot.getHand()).thenReturn(mockedHand);
-        when(mockedHuman.nextAction(any(Hand.class))).thenReturn(Action.Hit).thenReturn(Action.Busted);
-        when(mockedBot.nextAction(any(Hand.class))).thenReturn(Action.Stay);
-        when(mockedScore.scoreHand(anySet())).thenReturn(scoreAtStay).thenReturn(scoreOver21);
+        mocked_deal_cards_get_actions();
+        when(mockedOps.getScore(any(PlayerI.class))).thenReturn(scoreAtStay).thenReturn(scoreOver21);
+        when(mockedOps.determineWinner(anyInt(), anyInt())).thenReturn("Bot player wins the game with " + scoreAtStay + " Human loses with " + scoreOver21);
 
         String result = game.play();
 
-        assertEquals(result, "Bot player wins the game with " + scoreAtStay + " Human loses with " + scoreOver21);
-        verify(mockedHuman, times(2)).nextAction(any(Hand.class));
-        verify(mockedBot, times(1)).nextAction(any(Hand.class));
-        verify(mockedScore, times(2)).scoreHand(anySet());
-        verify(mockedDeck, times(5)).dealCard();
+        assertTrue(result.contains(scoreAtStay.toString()) && result.contains(scoreOver21.toString()));
     }
 
     @Test
     public void goes_until_player_with_highest_score_under_21_wins() throws OutOfCardsException{
-        Card card1 = new Card(Suit.Clubs, Rank.Nine);
-        Card card2 = new Card(Suit.Hearts, Rank.Jack);
-        mockedHand.addCard(card1);
-        mockedHand.addCard(card2);
-        when(mockedDeck.dealCard()).thenReturn(new Card(Suit.Clubs, Rank.Ten));
-        when(mockedHuman.getHand()).thenReturn(mockedHand);
-        when(mockedBot.getHand()).thenReturn(mockedHand);
-        when(mockedHuman.nextAction(any(Hand.class))).thenReturn(Action.Hit).thenReturn(Action.Stay);
-        when(mockedBot.nextAction(any(Hand.class))).thenReturn(Action.Hit).thenReturn(Action.Stay);
-        when(mockedScore.scoreHand(anySet())).thenReturn(scoreAtStay).thenReturn(scoreUnder21);
+        mocked_deal_cards_get_actions();
+        when(mockedOps.getScore(any(PlayerI.class))).thenReturn(scoreBlackJack).thenReturn(scoreAtStay);
+        when(mockedOps.determineWinner(anyInt(), anyInt())).thenReturn("Human wins the game with " + scoreUnder21 + " bot loses with " +scoreAtStay +"\n");
 
         String result = game.play();
 
-        assertEquals(result, "Human player wins the game with " + scoreUnder21 + " Bot loses with " + scoreAtStay);
-        verify(mockedHuman, times(2)).nextAction(any(Hand.class));
-        verify(mockedBot, times(2)).nextAction(any(Hand.class));
-        verify(mockedScore, times(2)).scoreHand(anySet());
-        verify(mockedDeck, times(6)).dealCard();
+        assertTrue(result.contains(scoreAtStay.toString()) && result.contains(scoreUnder21.toString()) );
     }
 
     @Test
     public void draw_when_both_players_have_same_score_under_21() throws OutOfCardsException{
-        Card card1 = new Card(Suit.Clubs, Rank.Nine);
-        Card card2 = new Card(Suit.Hearts, Rank.Jack);
-        mockedHand.addCard(card1);
-        mockedHand.addCard(card2);
-        when(mockedDeck.dealCard()).thenReturn(new Card(Suit.Clubs, Rank.Ten));
-        when(mockedHuman.getHand()).thenReturn(mockedHand);
-        when(mockedBot.getHand()).thenReturn(mockedHand);
-        when(mockedHuman.nextAction(any(Hand.class))).thenReturn(Action.Hit).thenReturn(Action.Stay);
-        when(mockedBot.nextAction(any(Hand.class))).thenReturn(Action.Hit).thenReturn(Action.Stay);
-        when(mockedScore.scoreHand(anySet())).thenReturn(scoreAtStay).thenReturn(scoreAtStay);
+        mocked_deal_cards_get_actions();
+        when(mockedOps.getScore(any(PlayerI.class))).thenReturn(scoreAtStay).thenReturn(scoreAtStay);
+        when(mockedOps.gameIsPush(anyInt(), anyInt())).thenReturn(true);
 
         String result = game.play();
 
-        assertEquals(result, "Game is a draw at " + scoreAtStay);
-        verify(mockedHuman, times(2)).nextAction(any(Hand.class));
-        verify(mockedBot, times(2)).nextAction(any(Hand.class));
-        verify(mockedScore, times(2)).scoreHand(anySet());
-        verify(mockedDeck, times(6)).dealCard();
+        assertTrue(result.contains(scoreAtStay.toString()));
     }
 
     @Test
     public void human_player_wins_with_a_natural_21() throws OutOfCardsException{
-        Card card1 = new Card(Suit.Clubs, Rank.Nine);
-        Card card2 = new Card(Suit.Hearts, Rank.Jack);
-        mockedHand.addCard(card1);
-        mockedHand.addCard(card2);
-        when(mockedDeck.dealCard()).thenReturn(new Card(Suit.Clubs, Rank.Ten));
-        when(mockedHuman.getHand()).thenReturn(mockedHand);
-        when(mockedBot.getHand()).thenReturn(mockedHand);
-        when(mockedHuman.nextAction(any(Hand.class))).thenReturn(Action.Stay);
-        when(mockedBot.nextAction(any(Hand.class))).thenReturn(Action.Hit).thenReturn(Action.Stay);
-        when(mockedScore.scoreHand(anySet())).thenReturn(scoreBlackJack).thenReturn(scoreBlackJack);
+        mocked_deal_cards_get_actions();
+        when(mockedOps.getScore(any(PlayerI.class))).thenReturn(scoreBlackJack).thenReturn(scoreAtStay);
+        when(mockedOps.determineWinner(anyInt(), anyInt())).thenReturn("Human wins the game with " + scoreBlackJack + " bot loses with " + scoreAtStay);
 
         String result = game.play();
 
-        assertTrue(result.contains(scoreBlackJack.toString()));
-        verify(mockedHuman, times(1)).nextAction(any(Hand.class));
-        verify(mockedBot, times(2)).nextAction(any(Hand.class));
-        verify(mockedScore, times(2)).scoreHand(anySet());
-        verify(mockedDeck, times(5)).dealCard();
+        assertTrue(result.contains(scoreBlackJack.toString()) && result.contains(scoreAtStay.toString()));
+    }
+
+    @Test
+    public void game_is_draw_when_both_players_have_21() throws OutOfCardsException{
+        mocked_deal_cards_get_actions();
+        when(mockedOps.getScore(any(PlayerI.class))).thenReturn(scoreBlackJack).thenReturn(scoreBlackJack);
+        when(mockedOps.gameIsPush(anyInt(), anyInt())).thenReturn(true);
+        String result = game.play();
+
+        assertEquals(result, "Game is a push at " + scoreBlackJack + "\n");
     }
 
     @Test
     public void bot_player_wins_with_a_natural_21() throws OutOfCardsException{
-        Card card1 = new Card(Suit.Clubs, Rank.Nine);
-        Card card2 = new Card(Suit.Hearts, Rank.Jack);
-        mockedHand.addCard(card1);
-        mockedHand.addCard(card2);
-        when(mockedDeck.dealCard()).thenReturn(new Card(Suit.Clubs, Rank.Ten));
-        when(mockedHuman.getHand()).thenReturn(mockedHand);
-        when(mockedBot.getHand()).thenReturn(mockedHand);
-        when(mockedHuman.nextAction(any(Hand.class))).thenReturn(Action.Stay);
-        when(mockedBot.nextAction(any(Hand.class))).thenReturn(Action.Stay);
-        when(mockedScore.scoreHand(anySet())).thenReturn(scoreBlackJack).thenReturn(scoreAtStay);
+        mocked_deal_cards_get_actions();
+        when(mockedOps.getScore(any(PlayerI.class))).thenReturn(scoreBlackJack).thenReturn(scoreAtStay);
+        when(mockedOps.determineWinner(anyInt(), anyInt())).thenReturn("Bot wins the game with " + scoreBlackJack + " human loses with " + scoreAtStay + "\n");
 
         String result = game.play();
 
-        assertTrue(result.contains(scoreBlackJack.toString()));
-        assertTrue(result.contains(scoreAtStay.toString()));
-        verify(mockedHuman, times(1)).nextAction(any(Hand.class));
-        verify(mockedBot, times(1)).nextAction(any(Hand.class));
-        verify(mockedScore, times(2)).scoreHand(anySet());
-        verify(mockedDeck, times(4)).dealCard();
+        assertTrue(result.contains(scoreBlackJack.toString()) && result.contains(scoreAtStay.toString()));
     }
 
     @Test
     public void no_one_wins_when_both_players_bust() throws OutOfCardsException{
-        Card card1 = new Card(Suit.Clubs, Rank.Nine);
-        Card card2 = new Card(Suit.Hearts, Rank.Jack);
-        mockedHand.addCard(card1);
-        mockedHand.addCard(card2);
-        when(mockedDeck.dealCard()).thenReturn(new Card(Suit.Clubs, Rank.Ten));
-        when(mockedHuman.getHand()).thenReturn(mockedHand);
-        when(mockedBot.getHand()).thenReturn(mockedHand);
-        when(mockedHuman.nextAction(any(Hand.class))).thenReturn(Action.Hit).thenReturn(Action.Busted);
-        when(mockedBot.nextAction(any(Hand.class))).thenReturn(Action.Hit).thenReturn(Action.Busted);
-        when(mockedScore.scoreHand(anySet())).thenReturn(scoreOver21).thenReturn(scoreOver21);
+        Integer anotherOver21 = scoreOver21 + 1;
+
+        mocked_deal_cards_get_actions();
+        when(mockedOps.getScore(any(PlayerI.class))).thenReturn(scoreOver21).thenReturn(anotherOver21);
+        when(mockedOps.bothPlayersBust(any(Action.class), any(Action.class))).thenReturn(true);
 
         String result = game.play();
 
-        assertEquals(result, "No one wins this game, both players busted. Human score " + scoreOver21 + " Bot score " + scoreOver21);
-        verify(mockedHuman, times(2)).nextAction(any(Hand.class));
-        verify(mockedBot, times(2)).nextAction(any(Hand.class));
-        verify(mockedScore, times(2)).scoreHand(anySet());
-        verify(mockedDeck, times(6)).dealCard();
+        assertTrue(result.contains(scoreOver21.toString()) && result.contains(anotherOver21.toString()));
     }
 
+    private void mocked_deal_cards_get_actions() throws OutOfCardsException{
+        when(mockedOps.initialGameDeal(any(BotPlayer.class), any(HumanPlayer.class))).thenReturn(mockedDeck);
+        when(mockedOps.handlePlayerAction(mockedBot, mockedHuman, mockedDeck)).thenReturn(Action.Stay);
+        when(mockedOps.handlePlayerAction(mockedHuman, mockedBot, mockedDeck)).thenReturn(Action.Stay);
+
+        String result = game.play();
+    }
 
 }

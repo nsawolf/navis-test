@@ -1,5 +1,5 @@
 public interface DeckI {
-    void shuffleDeck(Long seed);
+    void shuffleDeck();
 
     Card dealCard() throws OutOfCardsException;
 

@@ -8,6 +8,7 @@ public class BlackJackGame implements BlackJackGameI {
         OperationsI gameOps = Dependencies.gameOps.make();
         PlayerI botPlayer = Dependencies.botPlayer.make();
         PlayerI humanPlayer = Dependencies.humanPlayer.make();
+
         DeckI deck = gameOps.initialGameDeal(botPlayer, humanPlayer);
         Action humanAction = gameOps.handlePlayerAction(humanPlayer, botPlayer, deck);
         Action botAction = gameOps.handlePlayerAction(botPlayer, humanPlayer, deck);
