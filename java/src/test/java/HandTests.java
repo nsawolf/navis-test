@@ -58,4 +58,16 @@ public class HandTests {
 
         assertEquals(expectedCards, hcards);
     }
+
+    @Test
+    public void is_cleared_of_cards_when_reset(){
+        Hand hand = new Hand();
+        hand.addCard(fiveHearts);
+        hand.addCard(jackSpades);
+
+        hand.resetHand();
+
+        assertEquals(hand.size(), 0);
+    }
+
 }

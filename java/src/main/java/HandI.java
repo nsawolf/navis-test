@@ -5,4 +5,5 @@ public interface HandI {
     Set<Card> getCards();
     void addCard(Card card);
     int size();
+    void resetHand();
 }

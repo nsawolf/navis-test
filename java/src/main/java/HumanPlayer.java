@@ -18,7 +18,7 @@ public class HumanPlayer implements PlayerI {
             return Action.Busted;
         }
         String answer = prompt.prompt("Enter h for Hit, s for Stay \n", "[h, s]", "Invalid response. \n");
-        while (answer.equals("Invalid response.")){
+        while (answer.equals("Invalid response.")) {
             answer = prompt.prompt("Enter h for Hit, s for Stay \n", "[h, s]", "Invalid response. \n");
         }
         if (answer.contains(Action.Hit.getValue())) {
@@ -31,4 +31,5 @@ public class HumanPlayer implements PlayerI {
     public Hand getHand() {
         return humanHand;
     }
+
 }

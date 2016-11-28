@@ -7,7 +7,7 @@ public class Prompt implements PromptI {
         ConsoleIOI console = Dependencies.console.make();
         try {
             do {
-//                console.generateConsoleOutput(question, legalResponsePattern, defaultReturnValue);
+                console.generateConsoleOutput(question, legalResponsePattern, defaultReturnValue);
                 String input = console.getConsoleInput();
 
                 if (input.isEmpty()) {

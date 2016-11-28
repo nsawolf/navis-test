@@ -39,4 +39,7 @@ public class Hand implements HandI {
     public int size() {
         return cards.size();
     }
+
+    @Override
+    public void resetHand() {cards = new ArrayList<Card>();}
 }

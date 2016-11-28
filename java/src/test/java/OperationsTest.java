@@ -7,12 +7,14 @@ import org.junit.Test;
 import org.mockito.InOrder;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 public class OperationsTest {
 
     private Deck mockedDeck = mock(Deck.class);
-    private Hand mockedHand = spy(Hand.class);
+    private Hand mockedHand = mock(Hand.class);
     private HumanPlayer mockedHumanPlayer = mock(HumanPlayer.class);
     private BotPlayer mockedBotPlayer = mock(BotPlayer.class);
     private Score mockedScore = mock(Score.class);
@@ -24,10 +26,10 @@ public class OperationsTest {
     private Operations gameOps = new Operations();
 
     @Before
-    public void setup(){
+    public void setup() {
         Dependencies.hand.override(() -> mockedHand);
         Dependencies.deck.override(() -> mockedDeck);
-        Dependencies.humanPlayer.override (() -> mockedHumanPlayer);
+        Dependencies.humanPlayer.override(() -> mockedHumanPlayer);
         Dependencies.botPlayer.override(() -> mockedBotPlayer);
         Dependencies.score.override(() -> mockedScore);
         Dependencies.now.override(() -> mockedTimeValue);
@@ -35,7 +37,7 @@ public class OperationsTest {
     }
 
     @After
-    public void tearDown(){
+    public void tearDown() {
         Dependencies.deck.close();
         Dependencies.humanPlayer.close();
         Dependencies.botPlayer.close();
@@ -45,7 +47,7 @@ public class OperationsTest {
     }
 
     @Test
-    public void player_gets_card_dealt_to_hand() throws OutOfCardsException{
+    public void player_gets_card_dealt_to_hand() throws OutOfCardsException {
         when(mockedBotPlayer.getHand()).thenReturn(mockedHand);
 
         gameOps.dealCardToPlayer(mockedDeck, mockedBotPlayer);
@@ -69,10 +71,23 @@ public class OperationsTest {
         inOrder.verify(mockedDeck, times(4)).dealCard();
     }
 
+    @Test
+    public void clears_hand_before_initial_deal_of_card_when_playing_another_round() throws OutOfCardsException {
+        when(mockedHand.size()).thenReturn(3).thenReturn(2);
+        when(mockedBotPlayer.getHand()).thenReturn(mockedHand);
+        when(mockedDeck.dealCard()).thenReturn(eightDiamonds).thenReturn(threeSpades).thenReturn(aceClubs).thenReturn(tenHearts);
+        when(mockedBotPlayer.getHand()).thenReturn(mockedHand);
+        when(mockedHumanPlayer.getHand()).thenReturn(mockedHand);
+        InOrder inOrder = inOrder(mockedHand);
 
+        gameOps.initialGameDeal(mockedBotPlayer, mockedHumanPlayer);
+
+        verify(mockedHand, times(2)).size();
+        verify(mockedHand, times(2)).resetHand();
+    }
 
     @Test
-    public void does_not_deal_anymore_cards_when_player_stays() throws OutOfCardsException{
+    public void does_not_deal_anymore_cards_when_player_stays() throws OutOfCardsException {
         when(mockedHumanPlayer.nextAction(any(Hand.class))).thenReturn(Action.Stay);
 
         Action result = gameOps.handlePlayerAction(mockedHumanPlayer, mockedBotPlayer, mockedDeck);
@@ -82,7 +97,7 @@ public class OperationsTest {
     }
 
     @Test
-    public void deals_cards_until_player_stays() throws OutOfCardsException{
+    public void deals_cards_until_player_stays() throws OutOfCardsException {
         when(mockedHumanPlayer.nextAction(any(Hand.class))).thenReturn(Action.Hit).thenReturn(Action.Hit).thenReturn(Action.Stay);
         when(mockedHumanPlayer.getHand()).thenReturn(mockedHand);
 
@@ -93,7 +108,96 @@ public class OperationsTest {
     }
 
     @Test
-    public void score_of_player_hand_is_calculated_correctly(){
+    public void score_of_player_hand_is_calculated_correctly() {
+        when(mockedBotPlayer.getHand()).thenReturn(mockedHand);
+        when(mockedScore.scoreHand(anySet())).thenReturn(10);
 
+        Integer result = gameOps.getScore(mockedBotPlayer);
+
+        assertTrue(result == 10);
     }
+
+    @Test
+    public void same_scores_evaluate_to_pushed_game() {
+        boolean result = gameOps.gameIsPush(10, 10);
+
+        assertTrue(result);
+    }
+
+    @Test
+    public void both_players_having_busted_action_is_recognized() {
+        boolean result = gameOps.bothPlayersBust(Action.Busted, Action.Busted);
+
+        assertTrue(result);
+    }
+
+    @Test
+    public void human_score_under_21_wins_game_when_bot_over_21() {
+        String result = gameOps.determineWinner(22, 19);
+
+        assertTrue(result.contains("Human wins"));
+    }
+
+    @Test
+    public void bot_score_under_21_wins_game_when_human_over_21() {
+        String result = gameOps.determineWinner(19, 22);
+
+        assertTrue(result.contains("Bot wins"));
+    }
+
+    @Test
+    public void human_score_under_21_beats_bot_score_under_21() {
+        String result = gameOps.determineWinner(17, 19);
+
+        assertTrue(result.contains("Human wins"));
+    }
+
+    @Test
+    public void bot_score_under_21_beats_human_score_under_21() {
+        String result = gameOps.determineWinner(19, 17);
+
+        assertTrue(result.contains("Bot wins"));
+    }
+
+    @Test
+    public void no_result_when_both_players_are_over_21() {
+        String result = gameOps.determineWinner(22, 23);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void no_result_when_both_players_have_the_same_score() {
+        String result = gameOps.determineWinner(21, 21);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void when_hand_has_cards_it_is_not_empty() {
+        when(mockedHand.size()).thenReturn(3);
+
+        boolean result = gameOps.handIsEmpty(mockedHand);
+
+        assertFalse(result);
+    }
+
+    @Test
+    public void when_hand_does_not_have_cards_it_is_empty() {
+        when(mockedHand.size()).thenReturn(0);
+
+        boolean result = gameOps.handIsEmpty(mockedHand);
+
+        assertTrue(result);
+    }
+
+    @Test
+    public void hand_is_cleared_when_reset() {
+        when(mockedBotPlayer.getHand()).thenReturn(mockedHand);
+        gameOps.resetHand(mockedBotPlayer);
+
+        verify(mockedBotPlayer, times(1)).getHand();
+        verify(mockedHand, times(1)).resetHand();
+    }
+
 }

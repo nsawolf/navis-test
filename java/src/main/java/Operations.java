@@ -6,10 +6,24 @@ public class Operations implements OperationsI {
 
     private Integer blackJackWin = 21;
 
-    // TODO break out into deal card.. this is common among initial and hit no need to
-    // make it separate.  Do some head stands tonight and think about these things. :D
+    @Override
+    public void resetHand(PlayerI player){
+        player.getHand().resetHand();
+    }
+
+    @Override
+    public boolean handIsEmpty(Hand hand){
+        return hand.size() == 0;
+    }
+
     @Override
     public DeckI initialGameDeal(PlayerI botPlayer, PlayerI humanPlayer) throws OutOfCardsException {
+        if (!handIsEmpty(botPlayer.getHand())){
+            resetHand(botPlayer);
+        }
+        if (!handIsEmpty(humanPlayer.getHand())){
+            resetHand(humanPlayer);
+        }
         DeckI deck = Dependencies.deck.make();
         deck.shuffleDeck();
         for (int i = 0; i < 2; i++) {
@@ -50,14 +64,21 @@ public class Operations implements OperationsI {
     }
 
     @Override
+    public void showBotHand(PlayerI botPlayer){
+        ConsoleIOI console = Dependencies.console.make();
+        console.generateConsoleOutput("Bot's hand is: \n" + botPlayer.getHand().visibleHand(false) + "\n");
+    }
+
+    @Override
     public String determineWinner(Integer botScore, Integer humanScore){
         boolean hWithinBJ = humanScore <= blackJackWin;
         boolean bWithinBJ = botScore <= blackJackWin;
-        boolean hWins = humanScore > botScore;
+        boolean hWins = humanScore > botScore || !bWithinBJ;
+        boolean bWins = botScore > humanScore || !hWithinBJ;
 
         if (hWins && hWithinBJ){
             return "Human wins the game with " + humanScore + " bot loses with " + botScore + "\n";
-        } else if (!hWins && bWithinBJ){
+        } else if (bWins && bWithinBJ){
             return "Bot wins the game with " + botScore + " human loses with " + humanScore + "\n";
         }
         return "";

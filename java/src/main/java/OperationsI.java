@@ -14,4 +14,10 @@ public interface OperationsI {
     boolean bothPlayersBust(Action playerAction, Action otherAction);
 
     String determineWinner(Integer botScore, Integer humanScore);
+
+    boolean handIsEmpty(Hand hand);
+
+    void resetHand(PlayerI player);
+
+    void showBotHand(PlayerI botPlayer);
 }
