@@ -118,10 +118,16 @@ public class BlackjackGameTests {
         verify(mockedOps, times(1)).showBotHand(any(PlayerI.class));
     }
 
+    // TODO: more serious. What are you testing? (name vs body). This test proves nothing, and I can break code without test failure.
     @Test
     public void bot_player_wins_with_a_natural_21() throws OutOfCardsException {
+
+        /* What I expected to see:
+
+        setup: passed a bot and human score to a function, and asserted what it returned.
+         */
         mocked_deal_cards_get_actions();
-        when(mockedOps.getScore(any(PlayerI.class))).thenReturn(scoreBlackJack).thenReturn(scoreAtStay);
+        when(mockedOps.getScore(any(PlayerI.class))).thenReturn(scoreBlackJack).thenReturn(scoreAtStay); // TODO: (smell) high drag. I have to read play to understand why I need this programming
         when(mockedOps.determineWinner(anyInt(), anyInt())).thenReturn("Bot wins the game with " + scoreBlackJack + " human loses with " + scoreAtStay + "\n");
 
         String result = game.play();

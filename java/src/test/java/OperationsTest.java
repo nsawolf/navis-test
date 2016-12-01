@@ -71,6 +71,8 @@ public class OperationsTest {
         inOrder.verify(mockedDeck, times(4)).dealCard();
     }
 
+    // TODO: single-responsibility. Shouldn't the top-level game "reset" to a valid overall world? You wrote a bunch of
+    // code to do what "new Game" already would do
     @Test
     public void clears_hand_before_initial_deal_of_card_when_playing_another_round() throws OutOfCardsException {
         when(mockedHand.size()).thenReturn(3).thenReturn(2);
@@ -86,6 +88,9 @@ public class OperationsTest {
         verify(mockedHand, times(2)).resetHand();
     }
 
+    // TODO: "not" is a testing no-no. Say what it does, not what it doesn't.
+    // handlePlayerAction_stays_when_human_requests_stay
+    // handlePlayerAction_busts_when_human_busts
     @Test
     public void does_not_deal_anymore_cards_when_player_stays() throws OutOfCardsException {
         when(mockedHumanPlayer.nextAction(any(Hand.class))).thenReturn(Action.Stay);
@@ -96,6 +101,7 @@ public class OperationsTest {
         verify(mockedHumanPlayer, times(1)).nextAction(any(Hand.class));
     }
 
+    // really good. Says exactly what the behavior is
     @Test
     public void deals_cards_until_player_stays() throws OutOfCardsException {
         when(mockedHumanPlayer.nextAction(any(Hand.class))).thenReturn(Action.Hit).thenReturn(Action.Hit).thenReturn(Action.Stay);
@@ -107,13 +113,17 @@ public class OperationsTest {
         verify(mockedHumanPlayer, times(3)).nextAction(any(Hand.class));
     }
 
+    // TODO: not sure you need this. If so, the name would be "scoring_the_hand_uses_the_getScore_method". Code smell then: talking about HOW
+    // Even if that was what you wanted to prove, you should not have involved magic numbers
+    // TODO: The real behaviors for getScore are "passes the players cards to scoreHand" and "returns the result of scoreHand on those cards". Possibly worded as a single test
     @Test
-    public void score_of_player_hand_is_calculated_correctly() {
+    public void score_of_player_hand_is_calculated_correctly() { // TODO: "correctly" is meaningless
         when(mockedBotPlayer.getHand()).thenReturn(mockedHand);
         when(mockedScore.scoreHand(anySet())).thenReturn(10);
 
         Integer result = gameOps.getScore(mockedBotPlayer);
 
+        // TODO: would have been a verify, not based on magic number
         assertTrue(result == 10);
     }
 
