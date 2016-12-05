@@ -14,10 +14,10 @@ import static org.mockito.Mockito.*;
 public class OperationsTest {
 
     private Deck mockedDeck = mock(Deck.class);
-    private Hand mockedHand = mock(Hand.class);
+    private HandI mockedHand = mock(Hand.class);
     private HumanPlayer mockedHumanPlayer = mock(HumanPlayer.class);
     private BotPlayer mockedBotPlayer = mock(BotPlayer.class);
-    private Score mockedScore = mock(Score.class);
+    private GameResult mockedScore = mock(GameResult.class);
     private Long mockedTimeValue = 23L;
     private Card eightDiamonds = new Card(Suit.Diamonds, Rank.Eight);
     private Card tenHearts = new Card(Suit.Hearts, Rank.Ten);
@@ -31,7 +31,7 @@ public class OperationsTest {
         Dependencies.deck.override(() -> mockedDeck);
         Dependencies.humanPlayer.override(() -> mockedHumanPlayer);
         Dependencies.botPlayer.override(() -> mockedBotPlayer);
-        Dependencies.score.override(() -> mockedScore);
+        Dependencies.gameResult.override(() -> mockedScore);
         Dependencies.now.override(() -> mockedTimeValue);
         mockedHand.addCard(threeSpades);
     }
@@ -41,20 +41,9 @@ public class OperationsTest {
         Dependencies.deck.close();
         Dependencies.humanPlayer.close();
         Dependencies.botPlayer.close();
-        Dependencies.score.close();
+        Dependencies.gameResult.close();
         Dependencies.now.close();
         Dependencies.gameOps.close();
-    }
-
-    @Test
-    public void player_gets_card_dealt_to_hand() throws OutOfCardsException {
-        when(mockedBotPlayer.getHand()).thenReturn(mockedHand);
-
-        gameOps.dealCardToPlayer(mockedDeck, mockedBotPlayer);
-
-        verify(mockedBotPlayer, times(1)).getHand();
-        verify(mockedDeck, times(1)).dealCard();
-//        verify(mockedHand, times(1)).addCard(any(Card.class));
     }
 
     @Test
@@ -65,7 +54,7 @@ public class OperationsTest {
 
         InOrder inOrder = inOrder(mockedDeck);
 
-        gameOps.initialGameDeal(mockedBotPlayer, mockedHumanPlayer);
+        gameOps.initialGameDeal(mockedHand, mockedHand);
 
         inOrder.verify(mockedDeck, times(1)).shuffleDeck();
         inOrder.verify(mockedDeck, times(4)).dealCard();
@@ -82,7 +71,7 @@ public class OperationsTest {
         when(mockedHumanPlayer.getHand()).thenReturn(mockedHand);
         InOrder inOrder = inOrder(mockedHand);
 
-        gameOps.initialGameDeal(mockedBotPlayer, mockedHumanPlayer);
+        gameOps.initialGameDeal(mockedHand, mockedHand);
 
         verify(mockedHand, times(2)).size();
         verify(mockedHand, times(2)).resetHand();
@@ -95,7 +84,7 @@ public class OperationsTest {
     public void does_not_deal_anymore_cards_when_player_stays() throws OutOfCardsException {
         when(mockedHumanPlayer.nextAction(any(Hand.class))).thenReturn(Action.Stay);
 
-        Action result = gameOps.handlePlayerAction(mockedHumanPlayer, mockedBotPlayer, mockedDeck);
+        Action result = gameOps.handlePlayerAction(mockedHumanPlayer, mockedHand, mockedHand, mockedDeck);
 
         assertEquals(result, Action.Stay);
         verify(mockedHumanPlayer, times(1)).nextAction(any(Hand.class));
@@ -107,7 +96,7 @@ public class OperationsTest {
         when(mockedHumanPlayer.nextAction(any(Hand.class))).thenReturn(Action.Hit).thenReturn(Action.Hit).thenReturn(Action.Stay);
         when(mockedHumanPlayer.getHand()).thenReturn(mockedHand);
 
-        Action result = gameOps.handlePlayerAction(mockedHumanPlayer, mockedBotPlayer, mockedDeck);
+        Action result = gameOps.handlePlayerAction(mockedHumanPlayer, mockedHand, mockedHand, mockedDeck);
 
         assertEquals(result, Action.Stay);
         verify(mockedHumanPlayer, times(3)).nextAction(any(Hand.class));
@@ -116,16 +105,16 @@ public class OperationsTest {
     // TODO: not sure you need this. If so, the name would be "scoring_the_hand_uses_the_getScore_method". Code smell then: talking about HOW
     // Even if that was what you wanted to prove, you should not have involved magic numbers
     // TODO: The real behaviors for getScore are "passes the players cards to scoreHand" and "returns the result of scoreHand on those cards". Possibly worded as a single test
-    @Test
-    public void score_of_player_hand_is_calculated_correctly() { // TODO: "correctly" is meaningless
-        when(mockedBotPlayer.getHand()).thenReturn(mockedHand);
-        when(mockedScore.scoreHand(anySet())).thenReturn(10);
-
-        Integer result = gameOps.getScore(mockedBotPlayer);
-
-        // TODO: would have been a verify, not based on magic number
-        assertTrue(result == 10);
-    }
+//    @Test
+//    public void score_of_player_hand_is_calculated_correctly() { // TODO: "correctly" is meaningless
+//        when(mockedBotPlayer.getHand()).thenReturn(mockedHand);
+//        when(mockedHand.scoreHand()).thenReturn(10);
+//
+//        Integer result = gameOps.getScore(mockedBotPlayer);
+//
+//        // TODO: would have been a verify, not based on magic number
+//        assertTrue(result == 10);
+//    }
 
     @Test
     public void same_scores_evaluate_to_pushed_game() {
@@ -141,65 +130,65 @@ public class OperationsTest {
         assertTrue(result);
     }
 
-    @Test
-    public void human_score_under_21_wins_game_when_bot_over_21() {
-        String result = gameOps.determineWinner(22, 19);
+//    @Test
+//    public void human_score_under_21_wins_game_when_bot_over_21() {
+//        String result = gameOps.determineWinner(22, 19);
+//
+//        assertTrue(result.contains("Human wins"));
+//    }
 
-        assertTrue(result.contains("Human wins"));
-    }
+//    @Test
+//    public void bot_score_under_21_wins_game_when_human_over_21() {
+//        String result = gameOps.determineWinner(19, 22);
+//
+//        assertTrue(result.contains("Bot wins"));
+//    }
 
-    @Test
-    public void bot_score_under_21_wins_game_when_human_over_21() {
-        String result = gameOps.determineWinner(19, 22);
+//    @Test
+//    public void human_score_under_21_beats_bot_score_under_21() {
+//        String result = gameOps.determineWinner(17, 19);
+//
+//        assertTrue(result.contains("Human wins"));
+//    }
 
-        assertTrue(result.contains("Bot wins"));
-    }
+//    @Test
+//    public void bot_score_under_21_beats_human_score_under_21() {
+//        String result = gameOps.determineWinner(19, 17);
+//
+//        assertTrue(result.contains("Bot wins"));
+//    }
 
-    @Test
-    public void human_score_under_21_beats_bot_score_under_21() {
-        String result = gameOps.determineWinner(17, 19);
+//    @Test
+//    public void no_result_when_both_players_are_over_21() {
+//        String result = gameOps.determineWinner(22, 23);
+//
+//        assertTrue(result.isEmpty());
+//    }
 
-        assertTrue(result.contains("Human wins"));
-    }
+//    @Test
+//    public void no_result_when_both_players_have_the_same_score() {
+//        String result = gameOps.determineWinner(21, 21);
+//
+//        assertTrue(result.isEmpty());
+//    }
 
-    @Test
-    public void bot_score_under_21_beats_human_score_under_21() {
-        String result = gameOps.determineWinner(19, 17);
+//    @Test
+//    public void when_hand_has_cards_it_is_not_empty() {
+//        when(mockedHand.size()).thenReturn(3);
+//
+//        boolean result = gameOps.handIsEmpty(mockedHand);
+//
+//        assertFalse(result);
+//    }
 
-        assertTrue(result.contains("Bot wins"));
-    }
-
-    @Test
-    public void no_result_when_both_players_are_over_21() {
-        String result = gameOps.determineWinner(22, 23);
-
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void no_result_when_both_players_have_the_same_score() {
-        String result = gameOps.determineWinner(21, 21);
-
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void when_hand_has_cards_it_is_not_empty() {
-        when(mockedHand.size()).thenReturn(3);
-
-        boolean result = gameOps.handIsEmpty(mockedHand);
-
-        assertFalse(result);
-    }
-
-    @Test
-    public void when_hand_does_not_have_cards_it_is_empty() {
-        when(mockedHand.size()).thenReturn(0);
-
-        boolean result = gameOps.handIsEmpty(mockedHand);
-
-        assertTrue(result);
-    }
+//    @Test
+//    public void when_hand_does_not_have_cards_it_is_empty() {
+//        when(mockedHand.size()).thenReturn(0);
+//
+//        boolean result = gameOps.handIsEmpty(mockedHand);
+//
+//        assertTrue(result);
+//    }
 
     @Test
     public void hand_is_cleared_when_reset() {

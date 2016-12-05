@@ -1,4 +1,3 @@
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,6 +11,9 @@ import static org.mockito.Mockito.*;
 public class PromptTests {
 
     private ConsoleIO console = null;
+    private final String testQuestion = "Test Question";
+    private final String regexResponsePattern = "(.*\\w+.*)";
+    private final String defaultResponse = "Default Response";
 
     @Before
     public void setup() {
@@ -24,54 +26,52 @@ public class PromptTests {
         Dependencies.console.close();
     }
 
-    // TODO: smell: Magic values
     @Test
     public void asks_question_until_legal_reponse_is_received() throws IOException {
+        final String illegal = "not legal";
+        final String variableInput = "another guy";
+        final String testResponse = "test";
+        final String testPattern = "test";
         PromptI prompt = Dependencies.prompt.make();
-        when(console.getConsoleInput()).thenReturn("not legal").thenReturn("another guy").thenReturn("test");
+        when(console.getConsoleInput()).thenReturn(illegal).thenReturn(variableInput).thenReturn(testResponse);
 
-        String result = prompt.prompt("TestQuestion", "test", "Please Try Again");
+        String result = prompt.prompt(testQuestion, testPattern, defaultResponse);
 
         verify(console, times(2)).generateConsoleOutput(anyString());
         verify(console, times(3)).getConsoleInput();
-        assumeTrue(result.equals("test")); // TODO: overproof. not part of behavior under test. More than one behavior being proven, but not matching name of test
     }
 
-    // TODO: Missing behavior: real valid response is returned. (fixed by renaming trimming test)
-
-    // TODO: this is proving more than it claims. (overproof, causes potential cascades and higher drag)
     @Test
     public void empty_response_returns_the_default_response() throws IOException {
+        final String emptyResponse = "";
         PromptI prompt = Dependencies.prompt.make();
-        when(console.getConsoleInput()).thenReturn("");
+        when(console.getConsoleInput()).thenReturn(emptyResponse);
 
-        String result = prompt.prompt("A Question", "something", "Default Response");
+        String result = prompt.prompt(testQuestion, regexResponsePattern, defaultResponse);
 
-        assumeTrue(result.equals("Default Response"));
-        //verify(console, times(1)).getConsoleInput();
-        //verify(console, times(1)).generateConsoleOutput(anyString());
+        assumeTrue(result.equals(defaultResponse));
     }
 
     @Test
     public void returns_valid_response_with_whitespace_trimmed() throws IOException {
+        final String whiteSpacedValue = "  trim whitespaces off  ";
         PromptI prompt = Dependencies.prompt.make();
-        when(console.getConsoleInput()).thenReturn("  trim whitespaces off  ");
+        when(console.getConsoleInput()).thenReturn(whiteSpacedValue);
 
-        String result = prompt.prompt("A test question", "(.*)(\\w+)(.*)", "Default Response");
+        String result = prompt.prompt(testQuestion, regexResponsePattern, defaultResponse);
 
-        assumeTrue(result.equals("trim whitespaces off"));
-        // TODO: Why is a commented line of code still in production??? You have git. Just confuses reader
-//        verify(console, times(1)).getConsoleInput();
+        assumeTrue(result.equals(whiteSpacedValue.trim()));
     }
 
     @Test
     public void io_exception_returns_the_default() throws IOException {
+        final String exceptionValue = "testing io exception";
         PromptI prompt = Dependencies.prompt.make();
-        when(console.getConsoleInput()).thenThrow(new IOException("testing io exception"));
+        when(console.getConsoleInput()).thenThrow(new IOException(exceptionValue));
 
-        String result = prompt.prompt("A question", "some response", "Default Response");
+        String result = prompt.prompt(testQuestion, regexResponsePattern, defaultResponse);
 
-        assumeTrue(result.equals("Default Response"));
+        assumeTrue(result.equals(defaultResponse));
         verify(console, times(1)).getConsoleInput();
         verify(console, times(1)).generateConsoleOutput(anyString());
     }

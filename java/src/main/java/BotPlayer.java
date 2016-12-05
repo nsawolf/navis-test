@@ -4,27 +4,26 @@ import java.util.Set;
 
 public class BotPlayer implements PlayerI {
 
-    public Hand botHand = new Hand();
+    public Hand dealerHand = new Hand();
 
     @Override
-    public Action nextAction(Hand otherHand) {
-        ScoreI score = Dependencies.score.make();
-        Set<Card> ohand = otherHand.getCards();
-        Set<Card> bhand = botHand.getCards();
-        Integer bSum = score.scoreHand(bhand);
-        Integer oSum = score.scoreHand(ohand);
-        if (bSum > 16 && bSum <= 21){
+    public Action nextAction(HandI otherHand) {
+        final int stayScore = 16;
+        final int blackJackScore = 21;
+
+        int dealerScore = dealerHand.scoreHand();
+        int otherSum = otherHand.scoreHand();
+
+        if (dealerScore > stayScore && dealerScore <= blackJackScore){
             return Action.Stay;
-        } else if (bSum > 21){
+        } else if (dealerScore > blackJackScore){
             return Action.Busted;
         }
         return Action.Hit;
     }
 
     @Override
-    public Hand getHand() {
-        return botHand;
+    public HandI getHand() {
+        return dealerHand;
     }
-
-
 }

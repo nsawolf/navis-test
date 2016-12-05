@@ -41,6 +41,14 @@ public class Hand implements HandI {
         return cards.size();
     }
 
+    // TODO: Remove if no longer needed when changing main value
     @Override
-    public void resetHand() {cards = new ArrayList<Card>();}
+    public void resetHand() {
+        cards = new ArrayList<Card>();
+    }
+
+    @Override
+    public int scoreHand(){
+        return cards.parallelStream().map(card -> card.rank.getValue()).reduce(0, (x, y) -> x + y);
+    }
 }

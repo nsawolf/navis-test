@@ -1,23 +1,19 @@
 import enumerations.Action;
 
 public interface OperationsI {
-    DeckI initialGameDeal(PlayerI botPlayer, PlayerI humanPlayer) throws OutOfCardsException;
+    DeckI initialGameDeal(HandI dealerHand, HandI playerHand) throws OutOfCardsException;
 
-    void dealCardToPlayer(DeckI deck, PlayerI player) throws OutOfCardsException;
+    Action handlePlayerAction(PlayerI player, HandI playerHand, HandI otherHand, DeckI deck) throws OutOfCardsException;
 
-    Action handlePlayerAction(PlayerI player, PlayerI otherPlayer, DeckI deck) throws OutOfCardsException;
+    Integer getScore(HandI hand);
 
-    Integer getScore(PlayerI player);
-
-    boolean gameIsPush(Integer botScore, Integer humanScore);
+    boolean gameIsPush(int dealerScore, int playerScore);
 
     boolean bothPlayersBust(Action playerAction, Action otherAction);
-
-    String determineWinner(Integer botScore, Integer humanScore);
 
     boolean handIsEmpty(Hand hand);
 
     void resetHand(PlayerI player);
 
-    void showBotHand(PlayerI botPlayer);
+    void showBotHand(HandI hand);
 }
