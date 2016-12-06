@@ -1,66 +1,112 @@
 import enumerations.Action;
+import enumerations.GameOutcome;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class GameResultTests {
-//
-//    @Test
-//    public void same_scores_evaluate_to_pushed_game() {
-//        boolean result = gameOps.gameIsPush(10, 10);
-//
-//        assertTrue(result);
-//    }
-//
-//    @Test
-//    public void both_players_having_busted_action_is_recognized() {
-//        boolean result = gameOps.bothPlayersBust(Action.Busted, Action.Busted);
-//
-//        assertTrue(result);
-//    }
-//
+
+    private final int winningScore = 20;
+    private final int losingScore = 17;
+    private final String dealerHandInfo = "Dealer Hand";
+    private HandI mockedHand = mock(Hand.class);
 
 
+    @Before
+    public void setup(){
+        Dependencies.hand.override(() -> mockedHand);
+    }
 
-    //    @Test
-//    public void human_score_under_21_wins_game_when_bot_over_21() {
-//        String result = gameOps.determineWinner(22, 19);
-//
-//        assertTrue(result.contains("Human wins"));
-//    }
+    @After
+    public void tearDown(){
+        Dependencies.hand.close();
+    }
 
-//    @Test
-//    public void bot_score_under_21_wins_game_when_human_over_21() {
-//        String result = gameOps.determineWinner(19, 22);
-//
-//        assertTrue(result.contains("Bot wins"));
-//    }
+    @Test
+    public void determines_player_as_winner_of_game_when_player_score_is_higher(){
+        GameResultI gameResult = new GameResult();
 
-//    @Test
-//    public void human_score_under_21_beats_bot_score_under_21() {
-//        String result = gameOps.determineWinner(17, 19);
-//
-//        assertTrue(result.contains("Human wins"));
-//    }
+        GameOutcome result = gameResult.determineWinner(losingScore, winningScore);
 
-//    @Test
-//    public void bot_score_under_21_beats_human_score_under_21() {
-//        String result = gameOps.determineWinner(19, 17);
-//
-//        assertTrue(result.contains("Bot wins"));
-//    }
+        assertEquals(GameOutcome.Player, result);
+    }
 
-//    @Test
-//    public void no_result_when_both_players_are_over_21() {
-//        String result = gameOps.determineWinner(22, 23);
-//
-//        assertTrue(result.isEmpty());
-//    }
+    @Test
+    public void determines_dealer_as_winner_of_game_when_dealer_player_score_is_higher(){
+        GameResultI gameResult = new GameResult();
 
-//    @Test
-//    public void no_result_when_both_players_have_the_same_score() {
-//        String result = gameOps.determineWinner(21, 21);
-//
-//        assertTrue(result.isEmpty());
-//    }
+        GameOutcome result = gameResult.determineWinner(winningScore, losingScore);
+
+        assertEquals(GameOutcome.Dealer, result);
+    }
+
+    @Test
+    public void is_push_when_dealer_and_player_have_same_score(){
+        GameResultI gameResult = new GameResult();
+
+        boolean result = gameResult.gameIsPush(losingScore, losingScore);
+
+        assertTrue(result);
+    }
+
+    @Test
+    public void both_players_bust_when_each_player_reports_action_busted(){
+        GameResultI gameResult = new GameResult();
+
+        boolean result = gameResult.bothPlayersBust(Action.Busted, Action.Busted);
+
+        assertTrue(result);
+    }
+
+    @Test
+    public void resultOfGame_player_with_highest_score_wins_the_game(){
+        GameResultI gameResult = new GameResult();
+        GameResultI expected = new GameResult(GameOutcome.Player, losingScore, winningScore, dealerHandInfo);
+        when(mockedHand.scoreHand()).thenReturn(winningScore).thenReturn(losingScore);
+        when(mockedHand.visibleHand(false)).thenReturn(dealerHandInfo);
+
+        GameResultI result = gameResult.resultOfGame(Action.Stay, Action.Stay, mockedHand, mockedHand);
+
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void resultOfGame_dealer_with_highest_score_wins_the_game(){
+        GameResultI gameResult = new GameResult();
+        GameResultI expected = new GameResult(GameOutcome.Dealer, winningScore, losingScore, dealerHandInfo);
+        when(mockedHand.scoreHand()).thenReturn(losingScore).thenReturn(winningScore);
+        when(mockedHand.visibleHand(false)).thenReturn(dealerHandInfo);
+
+        GameResultI result = gameResult.resultOfGame(Action.Stay, Action.Stay, mockedHand, mockedHand);
+
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void resultOfGame_players_busted_game_is_bust(){
+        int dealerScore = 22;
+        int playerScore = 23;
+        GameResult gameResult = new GameResult();
+        GameResultI expected = new GameResult(GameOutcome.BothBusted, dealerScore, playerScore, dealerHandInfo);
+
+        GameResultI result = gameResult.resultOfGame(Action.Busted, Action.Busted, mockedHand, mockedHand);
+
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void resultOfGame_players_have_a_pushed_game(){
+        GameResult gameResult = new GameResult();
+        GameResultI expected = new GameResult(GameOutcome.Push, winningScore, winningScore, dealerHandInfo);
+
+        GameResultI result = gameResult.resultOfGame(Action.Stay, Action.Stay, mockedHand, mockedHand);
+
+        assertEquals(expected, result);
+    }
+
 }

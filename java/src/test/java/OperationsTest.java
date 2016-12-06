@@ -31,7 +31,6 @@ public class OperationsTest {
         Dependencies.botPlayer.override(() -> mockedBotPlayer);
         Dependencies.gameResult.override(() -> mockedScore);
         Dependencies.now.override(() -> mockedTimeValue);
-//        mockedHand.addCard(threeSpades);
     }
 
     @After

@@ -12,7 +12,7 @@ public class BotPlayer implements PlayerI {
         final int blackJackScore = 21;
 
         int dealerScore = dealerHand.scoreHand();
-        int otherSum = otherHand.scoreHand();
+//        int otherSum = otherHand.scoreHand();
 
         if (dealerScore > stayScore && dealerScore <= blackJackScore){
             return Action.Stay;

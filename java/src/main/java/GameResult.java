@@ -6,15 +6,17 @@ import java.util.Set;
 
 public class GameResult implements GameResultI {
 
-    private final int blackJackWin = 21;
+    private String gameResultString = null;
+    public GameResult(){}
 
     public GameResult(GameOutcome gameOutcome, int dealerScore, int playerScore, String showDealerHand){
-        gameOutcome.asString(dealerScore, playerScore, showDealerHand);
+        this.gameResultString = gameOutcome.asString(dealerScore, playerScore, showDealerHand);
     }
 
     // TODO: Probably belongs in GameResult (more abstractions)
     @Override
     public GameOutcome determineWinner(int dealerScore, int playerScore){
+        final int blackJackWin = 21;
         boolean playerBusted = playerScore > blackJackWin; // TODO: naming. Try to avoid abbreviations
         boolean dealerBusted = dealerScore > blackJackWin;
         boolean playerWon = playerScore > dealerScore || dealerBusted;
@@ -30,8 +32,6 @@ public class GameResult implements GameResultI {
 
     @Override
     public GameResult resultOfGame(Action humanAction, Action botAction, HandI dealerHand, HandI playerHand) {
-        // TODO: refactor. extract method. Would be Easier to test. Complected decisions and string generation. Single-responsibility
-        // Possible suggestion: Use enumerations with string values
         int dealerScore = dealerHand.scoreHand();
         int playerScore = playerHand.scoreHand();
         String showDealerHand = dealerHand.visibleHand(false);
@@ -54,5 +54,20 @@ public class GameResult implements GameResultI {
     @Override
     public boolean bothPlayersBust(Action playerAction, Action otherAction){
         return playerAction.equals(Action.Busted) && otherAction.equals(Action.Busted);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
+    }
+
+    @Override
+    public String toString() {
+        return  gameResultString;
     }
 }

@@ -13,6 +13,7 @@ public class HandTests {
 
     private Card fiveClubs = new Card(Suit.Clubs, Rank.Five);
     private Card jackSpades = new Card(Suit.Spades, Rank.Jack);
+    private Card aceDiamonds = new Card(Suit.Diamonds, Rank.Ace);
     private Card fiveHearts = new Card(Suit.Hearts, Rank.Five);
 
     @Test
@@ -62,11 +63,24 @@ public class HandTests {
     }
 
     @Test
-    public void total_value_of_cards_in_hand_is_expected_value(){
+    public void total_value_of_cards_in_hand_is_expected_value_without_ace(){
         int expectedResult = 15;
         Hand hand = new Hand();
         hand.addCard(fiveHearts);
         hand.addCard(jackSpades);
+
+        int result = hand.scoreHand();
+
+        assertEquals(expectedResult, result);
+    }
+
+    @Test
+    public void total_value_of_cards_in_hand_is_expected_value_with_ace(){
+        int expectedResult = 16;
+        Hand hand = new Hand();
+        hand.addCard(aceDiamonds);
+        hand.addCard(jackSpades);
+        hand.addCard(fiveHearts);
 
         int result = hand.scoreHand();
 

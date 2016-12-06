@@ -15,16 +15,12 @@ import static org.mockito.Mockito.*;
 public class BotPlayerTests {
 
     private HandI mockedHand = spy(Hand.class);
-    private GameResult mockedGameResult = mock(GameResult.class);
-    private PlayerI bot = Dependencies.botPlayer.make();
     private Card fiveHearts = new Card(Suit.Hearts, Rank.Five);
     private Card queenClubs = new Card(Suit.Clubs, Rank.Queen);
     private Card eightSpades = new Card(Suit.Spades, Rank.Eight);
-    private Card fiveDiamonds = new Card(Suit.Diamonds, Rank.Five);
-    Set<Card> dealerHand = bot.getHand().getCards();
-    Set<Card> otherHand = new HashSet<Card>();
+    private Card sevenDiamonds = new Card(Suit.Diamonds, Rank.Seven);
     private final int over17= 19;
-    private final int under17 = 13;
+    private final int under17 = 15;
     private final int busted = 22;
     private final int blackJack = 21;
     private final int under21 = 17;
@@ -33,70 +29,77 @@ public class BotPlayerTests {
     @Before
     public void setup() {
         Dependencies.hand.override(() -> mockedHand);
-        Dependencies.gameResult.override(() -> mockedGameResult);
-        dealerHand.add(fiveHearts);
-        dealerHand.add(queenClubs);
-        otherHand.add(fiveDiamonds);
-        otherHand.add(eightSpades);
     }
 
     @After
     public void teardown() {
         Dependencies.hand.close();
-        Dependencies.gameResult.close();
-        Dependencies.botPlayer.close();
     }
 
     @Test
-    public void hits_if_score_is_not_winning_and_under_stay_value() {
-        when(mockedHand.getCards()).thenReturn(otherHand);
-        when(mockedHand.scoreHand()).thenReturn(under17).thenReturn(over17);
+    public void stays_if_score_is_not_winning_and_above_stay_value() {
+        when(mockedHand.scoreHand()).thenReturn(over17);
+        PlayerI dealer = new BotPlayer();
+        HandI dealerHand = dealer.getHand();
+        dealerHand.addCard(eightSpades);
+        dealerHand.addCard(queenClubs);
 
-        Action result = bot.nextAction(mockedHand);
-        assertEquals(Action.Hit, result);
+        Action result = dealer.nextAction(mockedHand);
+
+        assertEquals(Action.Stay, result);
     }
 
     @Test
     public void busts_if_score_is_over_21() {
-        when(mockedHand.getCards()).thenReturn(otherHand);
-        when(mockedHand.scoreHand()).thenReturn(busted).thenReturn(over17);
+        PlayerI dealer = new BotPlayer();
+        when(mockedHand.scoreHand()).thenReturn(busted);
+        HandI dealerHand = dealer.getHand();
+        dealerHand.addCard(fiveHearts);
+        dealerHand.addCard(queenClubs);
+        dealerHand.addCard(eightSpades);
 
-        Action result = bot.nextAction(mockedHand);
+
+        Action result = dealer.nextAction(mockedHand);
 
         assertEquals(Action.Busted, result);
     }
 
     @Test
     public void stays_if_score_is_at_17() {
-        Set<Card> mHand = new HashSet<>();
-        mHand.add(fiveHearts);
-        mHand.add(queenClubs);
-        when(mockedHand.getCards()).thenReturn(mHand);
+        PlayerI dealer = new BotPlayer();
+        HandI dealerHand = dealer.getHand();
+        dealerHand.addCard(sevenDiamonds);
+        dealerHand.addCard(queenClubs);
         when(mockedHand.scoreHand()).thenReturn(under21).thenReturn(under17);
 
-        Action result = bot.nextAction(mockedHand);
+        Action result = dealer.nextAction(mockedHand);
         assertEquals(Action.Stay, result);
     }
 
     @Test
     public void stays_if_score_is_between_17_and_21() {
         final int twenty = 20;
-        Set<Card> mHand = new HashSet<>();
-        mHand.add(fiveHearts);
-        mHand.add(queenClubs);
-        when(mockedHand.getCards()).thenReturn(mHand);
+        PlayerI dealer = new BotPlayer();
+        HandI dealerHand = dealer.getHand();
+        dealerHand.addCard(eightSpades);
+        dealerHand.addCard(queenClubs);
         when(mockedHand.scoreHand()).thenReturn(twenty).thenReturn(under21);
 
-        Action result = bot.nextAction(mockedHand);
+        Action result = dealer.nextAction(mockedHand);
         assertEquals(Action.Stay, result);
     }
 
     @Test
     public void showHand_reveals_all_cards_in_hand(){
+        PlayerI dealer = new BotPlayer();
+        HandI dealerHand = dealer.getHand();
+        dealerHand.addCard(eightSpades);
+        dealerHand.addCard(queenClubs);
         when(mockedHand.visibleHand(false)).thenReturn(dealerHand.toString());
-        String result = bot.showHand();
 
-        verify(mockedHand, times(1)).visibleHand(false);
+        String result = dealer.showHand();
+
+        assertEquals(dealerHand.visibleHand(false), result);
     }
 
 }

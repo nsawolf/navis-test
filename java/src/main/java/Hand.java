@@ -1,3 +1,5 @@
+import enumerations.Rank;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -43,6 +45,14 @@ public class Hand implements HandI {
 
     @Override
     public int scoreHand(){
-        return cards.parallelStream().map(card -> card.rank.getValue()).reduce(0, (x, y) -> x + y);
+        final int blackjack = 21;
+        int calculated = cards.parallelStream().map(card -> card.rank.getValue()).reduce(0, (x, y) -> x + y);
+        if (cards.toString().contains(Rank.Ace.name())) {
+            int adjValue = calculated + 10;
+            if (adjValue <= 21){
+                return adjValue;
+            }
+        }
+        return calculated;
     }
 }

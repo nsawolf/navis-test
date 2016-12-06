@@ -18,8 +18,7 @@ import static org.mockito.Mockito.*;
 
 public class HumanPlayerTests {
 
-    private HumanPlayer humanPlayer = new HumanPlayer();
-    private HandI mockedHand = mock(Hand.class);
+    private HandI mockedHand = spy(Hand.class);
     private Prompt mockedPrompt = mock(Prompt.class);
     private Integer over21 = 22;
     private Integer blackJack = 21;
@@ -31,8 +30,6 @@ public class HumanPlayerTests {
     public void setup(){
         Dependencies.hand.override(() -> mockedHand);
         Dependencies.prompt.override(() -> mockedPrompt);
-//        mockedHand.addCard(new Card(Suit.Clubs, Rank.Five));
-//        mockedHand.addCard(new Card(Suit.Diamonds, Rank.Eight));
     }
 
     @After
@@ -47,8 +44,13 @@ public class HumanPlayerTests {
         final String handString = "eight, five";
         when(mockedHand.visibleHand(anyBoolean())).thenReturn(handString).thenReturn(handString);
         when(mockedHand.scoreHand()).thenReturn(over21);
+        HumanPlayer humanPlayer = new HumanPlayer();
+        HandI humanHand = humanPlayer.getHand();
+        humanHand.addCard(new Card(Suit.Clubs, Rank.Jack));
+        humanHand.addCard(new Card(Suit.Diamonds, Rank.Six));
+        humanHand.addCard(new Card(Suit.Spades, Rank.Eight));
 
-        Action result = humanPlayer.nextAction(null);
+        Action result = humanPlayer.nextAction(mockedHand);
 
         assertEquals(result, Action.Busted);
     }
@@ -57,19 +59,24 @@ public class HumanPlayerTests {
     public void stays_when_player_decides_to_not_have_more_cards_dealt() throws IOException{
         when(mockedHand.scoreHand()).thenReturn(blackJack);
         when(mockedPrompt.prompt(anyString(), anyString(), anyString())).thenReturn(Action.Stay.getValue());
+        HumanPlayer humanPlayer = new HumanPlayer();
+
         Action result = humanPlayer.nextAction(mockedHand);
 
         assertEquals(result, Action.Stay);
+        verify(mockedPrompt, times(1)).prompt(anyString(), anyString(), anyString());
     }
 
     @Test
     public void hits_when_player_decides_to_get_another_card() throws IOException{
         when(mockedHand.scoreHand()).thenReturn(smallValue);
         when(mockedPrompt.prompt(anyString(), anyString(), anyString())).thenReturn(Action.Hit.getValue());
+        HumanPlayer humanPlayer = new HumanPlayer();
 
         Action result = humanPlayer.nextAction(mockedHand);
 
         assertTrue(result.equals(Action.Hit));
+        verify(mockedPrompt, times(1)).prompt(anyString(), anyString(), anyString());
     }
 
     @Test
@@ -77,6 +84,7 @@ public class HumanPlayerTests {
         final String invalidResponse = "Invalid Response.";
         when(mockedHand.scoreHand()).thenReturn(smallValue);
         when(mockedPrompt.prompt(anyString(), anyString(), anyString())).thenReturn(invalidResponse).thenReturn(Action.Stay.getValue());
+         HumanPlayer humanPlayer = new HumanPlayer();
 
         Action result = humanPlayer.nextAction(mockedHand);
 

@@ -3,7 +3,7 @@ package enumerations;
 public enum GameOutcome {
     BothBusted, Push, Dealer, Player;
 
-    public String asString(int playerScore, int dealerScore, String showDealerHand) {
+    public String asString(int dealerScore, int playerScore, String showDealerHand) {
         switch (this) {
             case BothBusted:
                 return String.format("Both players have busted. \n Dealer Hand: %s \n Human score: %d \n Dealer score: %d \n ", showDealerHand, playerScore, dealerScore);
