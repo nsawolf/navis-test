@@ -6,5 +6,4 @@ public interface HandI {
     void addCard(Card card);
     int size();
     int scoreHand();
-    void resetHand();
 }

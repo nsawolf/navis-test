@@ -10,9 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class BotPlayerTests {
 
@@ -49,9 +47,8 @@ public class BotPlayerTests {
         Dependencies.botPlayer.close();
     }
 
-    //  Hits if not won score is under 17 (or something similar).
     @Test
-    public void hits_if_score_is_under_17() {
+    public void hits_if_score_is_not_winning_and_under_stay_value() {
         when(mockedHand.getCards()).thenReturn(otherHand);
         when(mockedHand.scoreHand()).thenReturn(under17).thenReturn(over17);
 
@@ -92,6 +89,14 @@ public class BotPlayerTests {
 
         Action result = bot.nextAction(mockedHand);
         assertEquals(Action.Stay, result);
+    }
+
+    @Test
+    public void showHand_reveals_all_cards_in_hand(){
+        when(mockedHand.visibleHand(false)).thenReturn(dealerHand.toString());
+        String result = bot.showHand();
+
+        verify(mockedHand, times(1)).visibleHand(false);
     }
 
 }

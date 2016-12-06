@@ -6,4 +6,6 @@ public interface PlayerI {
 
     HandI getHand();
 
+    String showHand();
+
 }

@@ -33,4 +33,8 @@ public class HumanPlayer implements PlayerI {
         return humanHand;
     }
 
+    @Override
+    public String showHand(){
+        return humanHand.visibleHand(false);
+    }
 }

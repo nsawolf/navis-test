@@ -1,3 +1,3 @@
 public interface BlackJackGameI {
-    String play() throws OutOfCardsException;
+    GameResult play() throws OutOfCardsException;
 }

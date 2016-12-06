@@ -7,16 +7,6 @@ public class Operations implements OperationsI {
     private Integer blackJackWin = 21;
 
     @Override
-    public void resetHand(PlayerI player){
-        player.getHand().resetHand();
-    }
-
-    @Override
-    public boolean handIsEmpty(Hand hand){
-        return hand.size() == 0;
-    }
-
-    @Override
     public DeckI initialGameDeal(HandI dealerHand, HandI playerHand) throws OutOfCardsException {
        // TODO: Remove resetting of game should happen when new play() happens in mainGuy
 //        if (!handIsEmpty(dealerHand.getCards())){
@@ -43,30 +33,6 @@ public class Operations implements OperationsI {
             action = player.nextAction(otherHand);
         }
         return action;
-    }
-
-    // TODO: similar to dealCardToPlayer. Factored too much. Probably belongs in Hand
-    @Override
-    public Integer getScore(HandI hand){
-        // scoreHand probably takes a hand, which in turn can give access to the set of cards
-        return hand.scoreHand();
-    }
-
-    @Override
-    public boolean gameIsPush(int dealerScore, int playerScore) {
-        return dealerScore == playerScore;
-    }
-
-    @Override
-    public boolean bothPlayersBust(Action playerAction, Action otherAction){
-        return playerAction.equals(Action.Busted) && otherAction.equals(Action.Busted);
-    }
-
-    // TODO: Probably belongs in Hand + PlayerI. Combination of law of demeter and single-responsibility. Operations should not be concerned with message formatting
-    @Override
-    public void showBotHand(HandI hand){
-        ConsoleIOI console = Dependencies.console.make();
-        console.generateConsoleOutput("Bot's hand is: \n" + hand.visibleHand(false) + "\n");
     }
 
 }

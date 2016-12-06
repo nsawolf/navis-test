@@ -24,7 +24,7 @@ public class BlackJackGame implements BlackJackGameI {
 
     // FIXME break out logic into operations helper method
     @Override
-    public String play() throws OutOfCardsException {
+    public GameResult  play() throws OutOfCardsException {
         GameResultI gameResult = Dependencies.gameResult.make();
         OperationsI gameOps = Dependencies.gameOps.make();
         PlayerI dealer = Dependencies.botPlayer.make();
@@ -34,14 +34,8 @@ public class BlackJackGame implements BlackJackGameI {
         Action humanAction = gameOps.handlePlayerAction(player, player.getHand(), dealer.getHand(), deck);
         Action botAction = gameOps.handlePlayerAction(dealer, dealer.getHand(), player.getHand(), deck);
 
-        int dealerScore = gameOps.getScore(dealer.getHand());
-        int playerScore = gameOps.getScore(player.getHand());
-        return gameResult.resultOfGame(gameOps, dealer, humanAction, botAction, dealerScore, playerScore);
-
+        return gameResult.resultOfGame(humanAction, botAction, dealer.getHand(), player.getHand());
 
     }
-
-
-
 
 }

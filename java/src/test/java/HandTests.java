@@ -28,10 +28,11 @@ public class HandTests {
         Hand hand = new Hand();
         hand.addCard(fiveHearts);
         hand.addCard(jackSpades);
+        String expectedHand = fiveHearts.toString() +"," + jackSpades.toString();
 
         String result = hand.visibleHand(false);
 
-        assertEquals(fiveHearts.toString() +"," + jackSpades.toString(), result);
+        assertEquals(expectedHand, result);
     }
 
     @Test
@@ -39,10 +40,11 @@ public class HandTests {
         Hand hand = new Hand();
         hand.addCard(fiveHearts);
         hand.addCard(jackSpades);
+        String expectedHand = hand.obscurredCard + "," + jackSpades.toString();
 
         String result = hand.visibleHand(true);
 
-        assertEquals(hand.obscurredCard + "," + jackSpades.toString(), result);
+        assertEquals(expectedHand, result);
     }
 
     @Test
@@ -57,18 +59,6 @@ public class HandTests {
         Set<Card> handCards = hand.getCards();
 
         assertEquals(expectedCards, handCards);
-    }
-
-    @Test
-    public void is_cleared_of_cards_when_reset(){
-        int expectedSize = 0;
-        Hand hand = new Hand();
-        hand.addCard(fiveHearts);
-        hand.addCard(jackSpades);
-
-        hand.resetHand();
-
-        assertEquals(expectedSize, hand.size());
     }
 
     @Test

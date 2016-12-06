@@ -4,7 +4,7 @@ import java.util.Set;
 
 public class BotPlayer implements PlayerI {
 
-    public Hand dealerHand = new Hand();
+    public HandI dealerHand = new Hand();
 
     @Override
     public Action nextAction(HandI otherHand) {
@@ -25,5 +25,10 @@ public class BotPlayer implements PlayerI {
     @Override
     public HandI getHand() {
         return dealerHand;
+    }
+
+    @Override
+    public String showHand(){
+        return dealerHand.visibleHand(false);
     }
 }

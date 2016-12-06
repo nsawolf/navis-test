@@ -1,4 +1,5 @@
 import enumerations.Action;
+import enumerations.GameOutcome;
 import enumerations.Rank;
 
 import java.util.Set;
@@ -6,35 +7,52 @@ import java.util.Set;
 public class GameResult implements GameResultI {
 
     private final int blackJackWin = 21;
+
+    public GameResult(GameOutcome gameOutcome, int dealerScore, int playerScore, String showDealerHand){
+        gameOutcome.asString(dealerScore, playerScore, showDealerHand);
+    }
+
     // TODO: Probably belongs in GameResult (more abstractions)
     @Override
-    public String determineWinner(int dealerScore, int playerScore){
+    public GameOutcome determineWinner(int dealerScore, int playerScore){
         boolean playerBusted = playerScore > blackJackWin; // TODO: naming. Try to avoid abbreviations
         boolean dealerBusted = dealerScore > blackJackWin;
         boolean playerWon = playerScore > dealerScore || dealerBusted;
         boolean dealerWon = dealerScore > playerScore || playerBusted;
 
         if (playerWon && !playerBusted){
-            return "Human wins the game with " + playerScore + " bot loses with " + dealerScore + "\n";
+            return GameOutcome.Player;
         } else if (dealerWon && !dealerBusted){
-            return "Bot wins the game with " + dealerScore + " human loses with " + playerScore + "\n";
+            return GameOutcome.Dealer;
         }
-        return "";
+        return null;
     }
 
     @Override
-    public String resultOfGame(OperationsI gameOps, PlayerI dealer, Action humanAction, Action botAction, int dealerScore, int playerScore) {
+    public GameResult resultOfGame(Action humanAction, Action botAction, HandI dealerHand, HandI playerHand) {
         // TODO: refactor. extract method. Would be Easier to test. Complected decisions and string generation. Single-responsibility
         // Possible suggestion: Use enumerations with string values
-        if (gameOps.bothPlayersBust(botAction, humanAction)) {
-            gameOps.showBotHand(dealer.getHand());
-            return "Both players bust at (" + dealerScore + ") bot and (" + playerScore + ")\n"; //new GameResult(GameResultE.BothBusted, botPlayer, humanPlayer);
-        } else if (gameOps.gameIsPush(dealerScore, playerScore)) {
-            gameOps.showBotHand(dealer.getHand());
-            return "Game is a push at " + playerScore + "\n";
+        int dealerScore = dealerHand.scoreHand();
+        int playerScore = playerHand.scoreHand();
+        String showDealerHand = dealerHand.visibleHand(false);
+
+        if (bothPlayersBust(botAction, humanAction)) {
+            return new GameResult(GameOutcome.BothBusted, dealerScore, playerScore, showDealerHand);
+        } else if (gameIsPush(dealerScore, playerScore)) {
+            return new GameResult(GameOutcome.Push, dealerScore, playerScore, showDealerHand);
         }
-        gameOps.showBotHand(dealer.getHand());
-        return determineWinner(dealerScore, playerScore);
+
+        GameOutcome winner = determineWinner(dealerScore, playerScore);
+        return new GameResult(winner, dealerScore, playerScore, showDealerHand);
     }
 
+    @Override
+    public boolean gameIsPush(int dealerScore, int playerScore) {
+        return dealerScore == playerScore;
+    }
+
+    @Override
+    public boolean bothPlayersBust(Action playerAction, Action otherAction){
+        return playerAction.equals(Action.Busted) && otherAction.equals(Action.Busted);
+    }
 }
