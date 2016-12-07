@@ -39,6 +39,7 @@ public class BlackjackGameTests {
         Dependencies.game.close();
     }
 
+    // TODO: perhaps re-work because this may be considered too much setup given session on 12/6/2016
     @Test
     public void human_player_wins_when_bot_busts() throws OutOfCardsException {
         final int winningScore = 20;

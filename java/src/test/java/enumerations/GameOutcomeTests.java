@@ -16,8 +16,8 @@ public class GameOutcomeTests {
         int dealerBusted = 23;
         int playerBusted = 22;
         String dealerBustedInfo = "Dealer hand";
-        String expectedResult = String.format("Both players have busted. \n Dealer Hand: %s \n Human score: %d \n Dealer score: %d \n ", dealerBustedInfo, playerBusted, dealerBusted);
-        assertEquals(GameOutcome.BothBusted.asString(playerBusted, dealerBusted, dealerBustedInfo), expectedResult);
+        String expectedResult = String.format("Both players have busted. \n Dealer Hand: %s \n Human score: %d \n Dealer score: %d", dealerBustedInfo, playerBusted, dealerBusted);
+        assertEquals(expectedResult, GameOutcome.BothBusted.asString(dealerBusted, playerBusted, dealerBustedInfo));
     }
 
     @Test
@@ -25,7 +25,7 @@ public class GameOutcomeTests {
         int pushValue = 17;
         String dealerInfo = "Dealer hand";
         String expectedResult = String.format("Game is a push, both players have the score: %d \n Dealer Hand: %s", pushValue, dealerInfo);
-        assertEquals(GameOutcome.Push.asString(pushValue, pushValue, dealerInfo), expectedResult);
+        assertEquals(expectedResult, GameOutcome.Push.asString(pushValue, pushValue, dealerInfo));
     }
 
     @Test
@@ -33,8 +33,8 @@ public class GameOutcomeTests {
         int dealerScore = 17;
         int playerScore = 16;
         String dealerInfo = "Dealer hand";
-        String expectedResult = String.format("Dealer has won. \n Dealer Hand: %s \n Dealer score: %d \n Human score: %d \n", dealerInfo, dealerScore, playerScore);
-        assertEquals(GameOutcome.Dealer.asString(playerScore, dealerScore, dealerInfo), expectedResult);
+        String expectedResult = String.format("Dealer has won. \n Dealer Hand: %s \n Dealer score: %d \n Human score: %d", dealerInfo, dealerScore, playerScore);
+        assertEquals(expectedResult, GameOutcome.Dealer.asString(dealerScore, playerScore, dealerInfo));
     }
 
     @Test
@@ -42,7 +42,7 @@ public class GameOutcomeTests {
         int dealerScore = 16;
         int playerScore = 17;
         String dealerInfo = "Dealer hand";
-        String expectedResult = String.format("Human player has won. \n Human score: %d \n Dealer score: %d \n Dealer Hand: %s \n", playerScore, dealerScore, dealerInfo);
-        assertEquals(GameOutcome.Player.asString(playerScore, dealerScore, dealerInfo), expectedResult);
+        String expectedResult = String.format("Human player has won. \n Human score: %d \n Dealer score: %d \n Dealer Hand: %s", playerScore, dealerScore, dealerInfo);
+        assertEquals(expectedResult, GameOutcome.Player.asString(dealerScore, playerScore, dealerInfo));
     }
 }

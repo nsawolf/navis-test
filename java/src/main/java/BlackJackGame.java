@@ -11,8 +11,10 @@ public class BlackJackGame implements BlackJackGameI {
 
         DeckI deck = gameOps.initialGameDeal(dealer.getHand(), player.getHand());
         Action humanAction = gameOps.handlePlayerAction(player, player.getHand(), dealer.getHand(), deck);
-        Action botAction = gameOps.handlePlayerAction(dealer, dealer.getHand(), player.getHand(), deck);
-
+//        TODO: rework logic.  If human busts, the game is over and the human has lost
+//        if (humanAction != Action.Busted) {
+            Action botAction = gameOps.handlePlayerAction(dealer, dealer.getHand(), player.getHand(), deck);
+//        }
         return gameResult.resultOfGame(humanAction, botAction, dealer.getHand(), player.getHand());
     }
 

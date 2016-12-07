@@ -38,17 +38,12 @@ public class HumanPlayerTests {
         Dependencies.prompt.close();
     }
 
-    // TODO:  fix this test
     @Test
     public void busts_if_score_is_over_21(){
         final String handString = "eight, five";
         when(mockedHand.visibleHand(anyBoolean())).thenReturn(handString).thenReturn(handString);
         when(mockedHand.scoreHand()).thenReturn(over21);
-        HumanPlayer humanPlayer = new HumanPlayer();
-        HandI humanHand = humanPlayer.getHand();
-        humanHand.addCard(new Card(Suit.Clubs, Rank.Jack));
-        humanHand.addCard(new Card(Suit.Diamonds, Rank.Six));
-        humanHand.addCard(new Card(Suit.Spades, Rank.Eight));
+        HumanPlayer humanPlayer = new HumanPlayer(mockedHand);
 
         Action result = humanPlayer.nextAction(mockedHand);
 
@@ -59,7 +54,7 @@ public class HumanPlayerTests {
     public void stays_when_player_decides_to_not_have_more_cards_dealt() throws IOException{
         when(mockedHand.scoreHand()).thenReturn(blackJack);
         when(mockedPrompt.prompt(anyString(), anyString(), anyString())).thenReturn(Action.Stay.getValue());
-        HumanPlayer humanPlayer = new HumanPlayer();
+        HumanPlayer humanPlayer = new HumanPlayer(mockedHand);
 
         Action result = humanPlayer.nextAction(mockedHand);
 
@@ -71,7 +66,7 @@ public class HumanPlayerTests {
     public void hits_when_player_decides_to_get_another_card() throws IOException{
         when(mockedHand.scoreHand()).thenReturn(smallValue);
         when(mockedPrompt.prompt(anyString(), anyString(), anyString())).thenReturn(Action.Hit.getValue());
-        HumanPlayer humanPlayer = new HumanPlayer();
+        HumanPlayer humanPlayer = new HumanPlayer(mockedHand);
 
         Action result = humanPlayer.nextAction(mockedHand);
 
@@ -84,7 +79,7 @@ public class HumanPlayerTests {
         final String invalidResponse = "Invalid Response.";
         when(mockedHand.scoreHand()).thenReturn(smallValue);
         when(mockedPrompt.prompt(anyString(), anyString(), anyString())).thenReturn(invalidResponse).thenReturn(Action.Stay.getValue());
-         HumanPlayer humanPlayer = new HumanPlayer();
+         HumanPlayer humanPlayer = new HumanPlayer(mockedHand);
 
         Action result = humanPlayer.nextAction(mockedHand);
 

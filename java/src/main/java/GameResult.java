@@ -13,7 +13,6 @@ public class GameResult implements GameResultI {
         this.gameResultString = gameOutcome.asString(dealerScore, playerScore, showDealerHand);
     }
 
-    // TODO: Probably belongs in GameResult (more abstractions)
     @Override
     public GameOutcome determineWinner(int dealerScore, int playerScore){
         final int blackJackWin = 21;

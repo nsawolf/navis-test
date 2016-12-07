@@ -4,7 +4,11 @@ import java.util.Set;
 
 public class BotPlayer implements PlayerI {
 
-    public HandI dealerHand = new Hand();
+    public HandI dealerHand = null;
+
+    public BotPlayer(HandI dealerHand){
+        this.dealerHand = dealerHand;
+    }
 
     @Override
     public Action nextAction(HandI otherHand) {
@@ -12,7 +16,6 @@ public class BotPlayer implements PlayerI {
         final int blackJackScore = 21;
 
         int dealerScore = dealerHand.scoreHand();
-//        int otherSum = otherHand.scoreHand();
 
         if (dealerScore > stayScore && dealerScore <= blackJackScore){
             return Action.Stay;

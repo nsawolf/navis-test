@@ -2,7 +2,11 @@ import enumerations.Action;
 
 public class HumanPlayer implements PlayerI {
 
-    private HandI humanHand = new Hand();
+    private HandI humanHand = null;
+
+    public HumanPlayer(HandI humanHand){
+        this.humanHand = humanHand;
+    }
 
     @Override
     public Action nextAction(HandI otherHand) {
