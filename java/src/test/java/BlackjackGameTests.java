@@ -11,18 +11,18 @@ public class BlackjackGameTests {
 
     private OperationsI mockedOps = mock(Operations.class);
     private Deck mockedDeck = mock(Deck.class);
-    private PlayerI mockedBot = mock(BotPlayer.class);
-    private PlayerI mockedHuman = mock(HumanPlayer.class);
     private GameResultI mockedGameResult = mock(GameResult.class);
     private HandI mockedHand = mock(Hand.class);
-    private BlackJackGame game = new BlackJackGame();
+    private BlackJackGameI game = Dependencies.game.make();
+    private final int winningScore = 20;
+    private final int bustedScore = 22;
+    private final int losingScore = 17;
+    private final String dealerHandInfo = "Dealer Hand";
 
     @Before
     public void setup() {
         Dependencies.gameOps.override(() -> mockedOps);
         Dependencies.deck.override(() -> mockedDeck);
-        Dependencies.botPlayer.override(() -> mockedBot);
-        Dependencies.humanPlayer.override(() -> mockedHuman);
         Dependencies.gameResult.override(() -> mockedGameResult);
         Dependencies.hand.override(() -> mockedHand);
         Dependencies.game.make();
@@ -32,34 +32,47 @@ public class BlackjackGameTests {
     public void teardown() {
         Dependencies.gameOps.close();
         Dependencies.deck.close();
-        Dependencies.botPlayer.close();
-        Dependencies.humanPlayer.close();
         Dependencies.gameResult.close();
         Dependencies.hand.close();
         Dependencies.game.close();
     }
 
-    // TODO: perhaps re-work because this may be considered too much setup given session on 12/6/2016
     @Test
     public void human_player_wins_when_bot_busts() throws OutOfCardsException {
-        final int winningScore = 20;
-        final int losingScore = 19;
-        final String dealerHandInfo = "Dealer Hand";
-        mocked_deal_cards_get_actions();
-        when(mockedOps.handlePlayerAction(mockedHuman, mockedHand, mockedHand, mockedDeck)).thenReturn(Action.Stay).thenReturn(Action.Stay);
-        when(mockedGameResult.resultOfGame(Action.Stay, Action.Stay, mockedHand, mockedHand)).thenReturn(new GameResult(GameOutcome.Player, winningScore, losingScore, dealerHandInfo));
+        when(mockedOps.handleHumanPlayerAction(mockedHand, mockedHand)).thenReturn(Action.Stay).thenReturn(Action.Busted);
+        when(mockedGameResult.resultOfGame(Action.Stay, Action.Busted, mockedHand, mockedHand)).thenReturn(new GameResult(GameOutcome.Player, losingScore, winningScore, dealerHandInfo));
 
         GameResultI result = game.play();
 
         verify(mockedOps, times(1)).initialGameDeal(any(Hand.class), any(Hand.class));
-        verify(mockedOps, times(2)).handlePlayerAction(any(PlayerI.class), any(Hand.class), any(Hand.class), any(Deck.class));
+        verify(mockedOps, times(1)).handleHumanPlayerAction(any(Hand.class), any(Hand.class));
+        verify(mockedOps, times(1)).handleDealerAction(any(Hand.class), any(Hand.class));
         verify(mockedGameResult, times(1)).resultOfGame(any(Action.class), any(Action.class), any(Hand.class), any(Hand.class));
     }
 
-    private void mocked_deal_cards_get_actions() throws OutOfCardsException {
-        when(mockedOps.initialGameDeal(any(Hand.class), any(Hand.class))).thenReturn(mockedDeck);
-        when(mockedOps.handlePlayerAction(mockedBot, mockedHand, mockedHand, mockedDeck)).thenReturn(Action.Stay);
-        when(mockedOps.handlePlayerAction(mockedHuman, mockedHand, mockedHand, mockedDeck)).thenReturn(Action.Stay);
+    @Test
+    public void bot_player_wins_when_human_busts() throws OutOfCardsException {
+        when(mockedOps.handleHumanPlayerAction(mockedHand, mockedHand)).thenReturn(Action.Busted);
+        when(mockedGameResult.resultOfGame(Action.Busted, Action.Stay, mockedHand, mockedHand)).thenReturn(new GameResult(GameOutcome.Dealer, winningScore, bustedScore, dealerHandInfo));
+
+        GameResultI result = game.play();
+
+        verify(mockedOps, times(1)).initialGameDeal(any(Hand.class), any(Hand.class));
+        verify(mockedOps, times(1)).handleHumanPlayerAction(any(Hand.class), any(Hand.class));
+        verify(mockedOps, times(0)).handleDealerAction(any(Hand.class), any(Hand.class));
+        verify(mockedGameResult, times(1)).resultOfGame(any(Action.class), any(Action.class), any(Hand.class), any(Hand.class));
     }
 
+    @Test
+    public void player_with_greater_score_not_busted_wins() throws OutOfCardsException {
+        when(mockedOps.handleHumanPlayerAction(mockedHand, mockedHand)).thenReturn(Action.Stay).thenReturn(Action.Stay);
+        when(mockedGameResult.resultOfGame(Action.Stay, Action.Stay, mockedHand, mockedHand)).thenReturn(new GameResult(GameOutcome.Player, losingScore, winningScore, dealerHandInfo));
+
+        GameResultI result = game.play();
+
+        verify(mockedOps, times(1)).initialGameDeal(any(Hand.class), any(Hand.class));
+        verify(mockedOps, times(1)).handleHumanPlayerAction(any(Hand.class), any(Hand.class));
+        verify(mockedOps, times(1)).handleDealerAction(any(Hand.class), any(Hand.class));
+        verify(mockedGameResult, times(1)).resultOfGame(any(Action.class), any(Action.class), any(Hand.class), any(Hand.class));
+    }
 }

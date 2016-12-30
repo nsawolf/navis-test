@@ -11,17 +11,13 @@ import static org.mockito.Mockito.*;
 
 public class OperationsTest {
 
-    private Deck mockedDeck = mock(Deck.class);
+    private DeckI mockedDeck = mock(Deck.class);
     private HandI mockedHand = mock(Hand.class);
     private HumanPlayer mockedHumanPlayer = mock(HumanPlayer.class);
     private BotPlayer mockedBotPlayer = mock(BotPlayer.class);
     private GameResult mockedScore = mock(GameResult.class);
     private Long mockedTimeValue = 23L;
-    private Card eightDiamonds = new Card(Suit.Diamonds, Rank.Eight);
-    private Card tenHearts = new Card(Suit.Hearts, Rank.Ten);
-    private Card threeSpades = new Card(Suit.Spades, Rank.Three);
-    private Card aceClubs = new Card(Suit.Clubs, Rank.Ace);
-    private Operations gameOps = new Operations();
+    private OperationsI gameOps = Dependencies.gameOps.make();
 
     @Before
     public void setup() {
@@ -45,23 +41,16 @@ public class OperationsTest {
 
     @Test
     public void initialGameDeal_shuffles_and_then_deals_cards() throws OutOfCardsException {
-        when(mockedDeck.dealCard()).thenReturn(eightDiamonds).thenReturn(threeSpades).thenReturn(aceClubs).thenReturn(tenHearts);
-        when(mockedBotPlayer.getHand()).thenReturn(mockedHand);
-        when(mockedHumanPlayer.getHand()).thenReturn(mockedHand);
-
-        InOrder inOrder = inOrder(mockedDeck);
-
         gameOps.initialGameDeal(mockedHand, mockedHand);
 
-        inOrder.verify(mockedDeck, times(1)).shuffleDeck();
-        inOrder.verify(mockedDeck, times(4)).dealCard();
+        verify(mockedHand, times(4)).addCard(any(Card.class));
     }
 
     @Test
     public void handlePlayerAction_stays_when_human_requests_stays() throws OutOfCardsException {
         when(mockedHumanPlayer.nextAction(any(Hand.class))).thenReturn(Action.Stay);
 
-        Action result = gameOps.handlePlayerAction(mockedHumanPlayer, mockedHand, mockedHand, mockedDeck);
+        Action result = gameOps.handleHumanPlayerAction(mockedHand, mockedHand);
 
         verify(mockedHumanPlayer, times(1)).nextAction(any(Hand.class));
     }
@@ -70,7 +59,7 @@ public class OperationsTest {
     public void handlePlayerAction_busts_when_human_busts() throws OutOfCardsException {
         when(mockedHumanPlayer.nextAction(any(Hand.class))).thenReturn(Action.Busted);
 
-        Action result = gameOps.handlePlayerAction(mockedHumanPlayer, mockedHand, mockedHand, mockedDeck);
+        Action result = gameOps.handleHumanPlayerAction(mockedHand, mockedHand);
 
         verify(mockedHumanPlayer, times(1)).nextAction(any(Hand.class));
     }
@@ -81,10 +70,12 @@ public class OperationsTest {
         when(mockedHumanPlayer.nextAction(any(Hand.class))).thenReturn(Action.Hit).thenReturn(Action.Hit).thenReturn(Action.Stay);
         when(mockedHumanPlayer.getHand()).thenReturn(mockedHand);
 
-        Action result = gameOps.handlePlayerAction(mockedHumanPlayer, mockedHand, mockedHand, mockedDeck);
+        Action result = gameOps.handleHumanPlayerAction(mockedHand, mockedHand);
 
         assertEquals(result, Action.Stay);
         verify(mockedHumanPlayer, times(3)).nextAction(any(Hand.class));
     }
+
+
 
 }
