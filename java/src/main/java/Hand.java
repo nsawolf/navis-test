@@ -27,7 +27,6 @@ public class Hand implements HandI {
         return cardstr;
     }
 
-    // NOTE: desirable behavior (that you have): modifying the set returned from getCards is isolated from Hand
     @Override
     public Set<Card> getCards() {
         return new HashSet<Card>(cards);

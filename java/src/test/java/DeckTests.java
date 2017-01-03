@@ -61,10 +61,6 @@ public class DeckTests {
         deck.dealCard();
     }
 
-    // -- maybe pass in random number generator so it can be controlled (take control to allow for easier testing)
-    //     if use a random number generator can assume it's already been tested in and of itself
-    //     in spec may want to say something about the number generator... depending on use
-
     @Test
     public void is_shuffled_cards_in_different_order(){
         Deck deck = new Deck();

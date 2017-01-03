@@ -4,7 +4,7 @@ import java.util.Set;
 
 public class BotPlayer implements PlayerI {
 
-    public HandI dealerHand = null;
+    private HandI dealerHand = null;
 
     public BotPlayer(HandI dealerHand){
         this.dealerHand = dealerHand;

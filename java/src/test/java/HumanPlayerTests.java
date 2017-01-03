@@ -20,11 +20,7 @@ public class HumanPlayerTests {
 
     private HandI mockedHand = spy(Hand.class);
     private Prompt mockedPrompt = mock(Prompt.class);
-    private Integer over21 = 22;
-    private Integer blackJack = 21;
     private Integer smallValue = 4;
-    private List<Card> cards = new ArrayList<Card>();
-
 
     @Before
     public void setup(){
@@ -41,6 +37,7 @@ public class HumanPlayerTests {
     @Test
     public void busts_if_score_is_over_21(){
         final String handString = "eight, five";
+        final int over21 = 22;
         when(mockedHand.visibleHand(anyBoolean())).thenReturn(handString).thenReturn(handString);
         when(mockedHand.scoreHand()).thenReturn(over21);
         HumanPlayer humanPlayer = new HumanPlayer(mockedHand);
@@ -52,6 +49,7 @@ public class HumanPlayerTests {
 
     @Test
     public void stays_when_player_decides_to_not_have_more_cards_dealt() throws IOException{
+        final int blackJack = 21;
         when(mockedHand.scoreHand()).thenReturn(blackJack);
         when(mockedPrompt.prompt(anyString(), anyString(), anyString())).thenReturn(Action.Stay.getValue());
         HumanPlayer humanPlayer = new HumanPlayer(mockedHand);
@@ -75,7 +73,7 @@ public class HumanPlayerTests {
     }
 
     @Test
-    public void asked_question_until_valid_response_entered() throws IOException{
+    public void asks_question_until_valid_response_entered() throws IOException{
         final String invalidResponse = "Invalid Response.";
         when(mockedHand.scoreHand()).thenReturn(smallValue);
         when(mockedPrompt.prompt(anyString(), anyString(), anyString())).thenReturn(invalidResponse).thenReturn(Action.Stay.getValue());
@@ -85,5 +83,27 @@ public class HumanPlayerTests {
 
         assertEquals(result, Action.Stay);
         verify(mockedPrompt, times(2)).prompt(anyString(), anyString(), anyString());
+    }
+
+    @Test
+    public void showHand_displays_cards_in_hand(){
+        final String humanHand = "eight, jack";
+        PlayerI humanPlayer = new HumanPlayer(mockedHand);
+        when(mockedHand.visibleHand(false)).thenReturn(humanHand);
+
+        String result = humanPlayer.showHand();
+
+        assertEquals(humanHand, result);
+        verify(mockedHand, times(1)).visibleHand(false);
+
+    }
+
+    @Test
+    public void getHand_contains_human_hand(){
+        final Card jack = new Card(Suit.Clubs, Rank.Jack);
+        mockedHand.addCard(jack);
+        PlayerI humanPlayer = new HumanPlayer(mockedHand);
+        HandI hand = humanPlayer.getHand();
+        assertEquals(hand.size(), 1);
     }
 }

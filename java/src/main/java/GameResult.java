@@ -16,7 +16,7 @@ public class GameResult implements GameResultI {
     @Override
     public GameOutcome determineWinner(int dealerScore, int playerScore){
         final int blackJackWin = 21;
-        boolean playerBusted = playerScore > blackJackWin; // TODO: naming. Try to avoid abbreviations
+        boolean playerBusted = playerScore > blackJackWin;
         boolean dealerBusted = dealerScore > blackJackWin;
         boolean playerWon = playerScore > dealerScore || dealerBusted;
         boolean dealerWon = dealerScore > playerScore || playerBusted;

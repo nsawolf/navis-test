@@ -78,7 +78,7 @@ public class GameResultTests {
     @Test
     public void resultOfGame_dealer_with_highest_score_wins_the_game(){
         GameResultI gameResult = new GameResult();
-        String expected = new GameResult(GameOutcome.Dealer, winningScore, losingScore, dealerHandInfo).toString();
+        final String expected = new GameResult(GameOutcome.Dealer, winningScore, losingScore, dealerHandInfo).toString();
         when(mockedHand.scoreHand()).thenReturn(winningScore).thenReturn(losingScore);
         when(mockedHand.visibleHand(false)).thenReturn(dealerHandInfo);
 
@@ -89,8 +89,8 @@ public class GameResultTests {
 
     @Test
     public void resultOfGame_players_busted_game_is_bust(){
-        int dealerScore = 22;
-        int playerScore = 23;
+        final int dealerScore = 22;
+        final int playerScore = 23;
         GameResult gameResult = new GameResult();
         String expected = new GameResult(GameOutcome.BothBusted, dealerScore, playerScore, dealerHandInfo).toString();
         when(mockedHand.scoreHand()).thenReturn(dealerScore).thenReturn(playerScore);
@@ -104,7 +104,7 @@ public class GameResultTests {
     @Test
     public void resultOfGame_players_have_a_pushed_game(){
         GameResult gameResult = new GameResult();
-        String expected = new GameResult(GameOutcome.Push, winningScore, winningScore, dealerHandInfo).toString();
+        final String expected = new GameResult(GameOutcome.Push, winningScore, winningScore, dealerHandInfo).toString();
         when(mockedHand.scoreHand()).thenReturn(20);
         when(mockedHand.visibleHand(false)).thenReturn(dealerHandInfo);
 

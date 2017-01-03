@@ -23,8 +23,8 @@ public class OperationsTest {
     public void setup() {
         Dependencies.hand.override(() -> mockedHand);
         Dependencies.deck.override(() -> mockedDeck);
-        Dependencies.humanPlayer.override(() -> mockedHumanPlayer);
-        Dependencies.botPlayer.override(() -> mockedBotPlayer);
+        Dependencies.humanPlayer.override((a) -> mockedHumanPlayer);
+        Dependencies.botPlayer.override((a) -> mockedBotPlayer);
         Dependencies.gameResult.override(() -> mockedScore);
         Dependencies.now.override(() -> mockedTimeValue);
     }
@@ -53,6 +53,7 @@ public class OperationsTest {
         Action result = gameOps.handleHumanPlayerAction(mockedHand, mockedHand);
 
         verify(mockedHumanPlayer, times(1)).nextAction(any(Hand.class));
+        verify(mockedHand, times(0)).addCard(any(Card.class));
     }
 
     @Test
@@ -62,6 +63,7 @@ public class OperationsTest {
         Action result = gameOps.handleHumanPlayerAction(mockedHand, mockedHand);
 
         verify(mockedHumanPlayer, times(1)).nextAction(any(Hand.class));
+        verify(mockedHand, times(0)).addCard(any(Card.class));
     }
 
     // really good. Says exactly what the behavior is
@@ -74,8 +76,28 @@ public class OperationsTest {
 
         assertEquals(result, Action.Stay);
         verify(mockedHumanPlayer, times(3)).nextAction(any(Hand.class));
+        verify(mockedHand, times(2)).addCard(any(Card.class));
     }
 
+    @Test
+    public void handleDealerAction_busts_when_dealer_busts() throws OutOfCardsException {
+        when(mockedBotPlayer.nextAction(any(Hand.class))).thenReturn(Action.Hit).thenReturn(Action.Busted);
 
+        Action result = gameOps.handleDealerAction(mockedHand, mockedHand);
 
+        assertEquals(result, Action.Busted);
+        verify(mockedBotPlayer, times(2)).nextAction(any(Hand.class));
+        verify(mockedHand, times(1)).addCard(any(Card.class));
+    }
+
+    @Test
+    public void handleDealerAction_stays_when_dealer_stays() throws OutOfCardsException {
+        when(mockedBotPlayer.nextAction(any(Hand.class))).thenReturn(Action.Stay);
+
+        Action result = gameOps.handleDealerAction(mockedHand, mockedHand);
+
+        assertEquals(result, Action.Stay);
+        verify(mockedBotPlayer, times(1)).nextAction(any(Hand.class));
+        verify(mockedHand, times(0)).addCard(any(Card.class));
+    }
 }

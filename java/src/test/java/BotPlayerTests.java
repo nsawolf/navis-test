@@ -15,10 +15,6 @@ import static org.mockito.Mockito.*;
 public class BotPlayerTests {
 
     private HandI mockedHand = spy(Hand.class);
-    private final int over17= 19;
-    private final int under17 = 15;
-    private final int busted = 22;
-    private final int under21 = 17;
 
 
     @Before
@@ -33,6 +29,7 @@ public class BotPlayerTests {
 
     @Test
     public void stays_if_score_is_not_winning_and_above_stay_value() {
+        final int over17 = 19;
         PlayerI dealer = new BotPlayer(mockedHand);
         when(mockedHand.scoreHand()).thenReturn(over17);
 
@@ -43,6 +40,7 @@ public class BotPlayerTests {
 
     @Test
     public void busts_if_score_is_over_21() {
+        final int busted = 22;
         PlayerI dealer = new BotPlayer(mockedHand);
         when(mockedHand.scoreHand()).thenReturn(busted);
 
@@ -53,8 +51,9 @@ public class BotPlayerTests {
 
     @Test
     public void stays_if_score_is_at_17() {
+        final int under21 = 17;
         PlayerI dealer = new BotPlayer(mockedHand);
-        when(mockedHand.scoreHand()).thenReturn(under21).thenReturn(under17);
+        when(mockedHand.scoreHand()).thenReturn(under21);
 
         Action result = dealer.nextAction(mockedHand);
 
@@ -65,7 +64,7 @@ public class BotPlayerTests {
     public void stays_if_score_is_between_17_and_21() {
         final int twenty = 20;
         PlayerI dealer = new BotPlayer(mockedHand);
-        when(mockedHand.scoreHand()).thenReturn(twenty).thenReturn(under21);
+        when(mockedHand.scoreHand()).thenReturn(twenty);
 
         Action result = dealer.nextAction(mockedHand);
 
@@ -73,7 +72,16 @@ public class BotPlayerTests {
     }
 
     @Test
-    public void showHand_reveals_all_cards_in_hand(){
+    public void hits_if_score_is_under_17(){
+        final int under17 = 15;
+        PlayerI dealer = new BotPlayer(mockedHand);
+        when(mockedHand.scoreHand()).thenReturn(under17);
+        Action result  = dealer.nextAction(mockedHand);
+        assertEquals(Action.Hit, result);
+    }
+
+    @Test
+    public void showHand_reveals_all_cards_in_hand_when_game_over(){
         final String dealerHand = "eight, jack";
         PlayerI dealer = new BotPlayer(mockedHand);
         when(mockedHand.visibleHand(false)).thenReturn(dealerHand);
@@ -82,6 +90,15 @@ public class BotPlayerTests {
 
         assertEquals(dealerHand, result);
         verify(mockedHand, times(1)).visibleHand(false);
+    }
+
+    @Test
+    public void getHand_contains_dealer_hand(){
+        final Card jack = new Card(Suit.Clubs, Rank.Jack);
+        mockedHand.addCard(jack);
+        PlayerI dealer = new BotPlayer(mockedHand);
+        HandI hand = dealer.getHand();
+        assertEquals(hand.size(), 1);
     }
 
 }

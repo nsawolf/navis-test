@@ -15,7 +15,6 @@ public class BlackjackGameTests {
     private HandI mockedHand = mock(Hand.class);
     private BlackJackGameI game = Dependencies.game.make();
     private final int winningScore = 20;
-    private final int bustedScore = 22;
     private final int losingScore = 17;
     private final String dealerHandInfo = "Dealer Hand";
 
@@ -52,6 +51,7 @@ public class BlackjackGameTests {
 
     @Test
     public void bot_player_wins_when_human_busts() throws OutOfCardsException {
+        final int bustedScore = 22;
         when(mockedOps.handleHumanPlayerAction(mockedHand, mockedHand)).thenReturn(Action.Busted);
         when(mockedGameResult.resultOfGame(Action.Busted, Action.Stay, mockedHand, mockedHand)).thenReturn(new GameResult(GameOutcome.Dealer, winningScore, bustedScore, dealerHandInfo));
 

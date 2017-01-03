@@ -64,7 +64,7 @@ public class HandTests {
 
     @Test
     public void total_value_of_cards_in_hand_is_expected_value_without_ace(){
-        int expectedResult = 15;
+        final int expectedResult = 15;
         Hand hand = new Hand();
         hand.addCard(fiveHearts);
         hand.addCard(jackSpades);
@@ -76,7 +76,7 @@ public class HandTests {
 
     @Test
     public void total_value_of_cards_in_hand_is_expected_value_with_ace(){
-        int expectedResult = 16;
+        final int expectedResult = 16;
         Hand hand = new Hand();
         hand.addCard(aceDiamonds);
         hand.addCard(jackSpades);
