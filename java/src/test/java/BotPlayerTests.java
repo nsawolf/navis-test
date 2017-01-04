@@ -10,6 +10,7 @@ import static org.mockito.Mockito.*;
 public class BotPlayerTests {
 
     private Hand mockedHand = mock(Hand.class);
+    PlayerI dealer = new BotPlayer(mockedHand);
 
 
     @Before
@@ -23,59 +24,30 @@ public class BotPlayerTests {
     }
 
     @Test
-    public void stays_if_score_is_not_winning_and_above_stay_value() {
-        final int over17 = 19;
-        PlayerI dealer = new BotPlayer(mockedHand);
-        when(mockedHand.scoreHand()).thenReturn(over17);
-
-        Action result = dealer.nextAction(mockedHand);
-
-        assertEquals(Action.Stay, result);
+    public void hits_if_score_is_withinin_range_of_0_and_less_than_stay_value_of_17() {
+       score_range_helper(0, 16, Action.Hit);
     }
 
     @Test
-    public void busts_if_score_is_over_21() {
-        final int busted = 22;
-        PlayerI dealer = new BotPlayer(mockedHand);
-        when(mockedHand.scoreHand()).thenReturn(busted);
-
-        Action result = dealer.nextAction(mockedHand);
-
-        assertEquals(Action.Busted, result);
+    public void busts_if_score_is_greater_than_21(){
+        score_range_helper(22, 27, Action.Busted);
     }
 
     @Test
-    public void stays_if_score_is_at_17() {
-        final int under21 = 17;
-        PlayerI dealer = new BotPlayer(mockedHand);
-        when(mockedHand.scoreHand()).thenReturn(under21);
-
-        Action result = dealer.nextAction(mockedHand);
-
-        assertEquals(Action.Stay, result);
+    public void stays_if_score_is_within_range_17_to_21(){
+        score_range_helper(17, 21, Action.Stay);
     }
 
-    @Test
-    public void stays_if_score_is_between_17_and_21() {
-        final int twenty = 20;
+    private void score_range_helper(int startRange, int endRange, Action expectedAction){
         PlayerI dealer = new BotPlayer(mockedHand);
-        when(mockedHand.scoreHand()).thenReturn(twenty);
+        for(int i = startRange; i <= endRange; i++){
+            when(mockedHand.scoreHand()).thenReturn(i);
+            Action result = dealer.nextAction(mockedHand);
+            assertEquals(expectedAction, result);
 
-        Action result = dealer.nextAction(mockedHand);
-
-        assertEquals(Action.Stay, result);
+        }
     }
 
-    @Test
-    public void hits_if_score_is_under_17(){
-        final int under17 = 15;
-        PlayerI dealer = new BotPlayer(mockedHand);
-        when(mockedHand.scoreHand()).thenReturn(under17);
-        Action result  = dealer.nextAction(mockedHand);
-        assertEquals(Action.Hit, result);
-    }
-
-    // TODO: shows_visible_hand_with_no_cards_hidden ... Game being over has nothing to do with behavior
     @Test
     public void shows_visible_hand_with_no_cards_hidden() {
         final String dealerHand = "eight, jack";
@@ -93,5 +65,6 @@ public class BotPlayerTests {
         Hand hand = dealer.getHand();
         assertSame(hand, mockedHand);
     }
+
 
 }
