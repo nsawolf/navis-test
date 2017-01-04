@@ -3,28 +3,31 @@ import enumerations.GameOutcome;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InOrder;
+
+import java.util.Stack;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 public class BlackjackGameTests {
 
-    private OperationsI mockedOps = mock(Operations.class);
+    private Operations mockedOps = mock(Operations.class);
     private Deck mockedDeck = mock(Deck.class);
-    private GameResultI mockedGameResult = mock(GameResult.class);
-    private HandI mockedHand = mock(Hand.class);
-    private BlackJackGameI game = Dependencies.game.make();
-    private final int winningScore = 20;
-    private final int losingScore = 17;
-    private final String dealerHandInfo = "Dealer Hand";
+    private GameResult mockedGameResult = mock(GameResult.class);
+    private Hand playerHand = mock(Hand.class);
+    private Hand dealerHand = mock(Hand.class);
+    private BlackJackGame game = Dependencies.game.make();
 
     @Before
     public void setup() {
+        final Stack<Hand> h = new Stack();
+        h.push(dealerHand);
+        h.push(playerHand);
         Dependencies.gameOps.override(() -> mockedOps);
         Dependencies.deck.override(() -> mockedDeck);
         Dependencies.gameResult.override(() -> mockedGameResult);
-        Dependencies.hand.override(() -> mockedHand);
-        Dependencies.game.make();
+        Dependencies.hand.override(() -> h.pop());
     }
 
     @After
@@ -33,46 +36,44 @@ public class BlackjackGameTests {
         Dependencies.deck.close();
         Dependencies.gameResult.close();
         Dependencies.hand.close();
-        Dependencies.game.close();
+    }
+
+    // THESE ARE NOT THE TESTS YOU'RE LOOKING FOR
+    // TODO: InOrder verification of play
+    // Stay at level of abstraction
+    @Test
+    public void initializes_the_game_and_processes_human_player() throws OutOfCardsException {
+        GameResult result = game.play();
+
+        InOrder order = inOrder(mockedOps);
+
+        order.verify(mockedOps, times(1)).initialGameDeal(same(dealerHand), same(playerHand));
+        order.verify(mockedOps, times(1)).handleHumanPlayerAction(same(playerHand), eq(dealerHand));
     }
 
     @Test
-    public void human_player_wins_when_bot_busts() throws OutOfCardsException {
-        when(mockedOps.handleHumanPlayerAction(mockedHand, mockedHand)).thenReturn(Action.Stay).thenReturn(Action.Busted);
-        when(mockedGameResult.resultOfGame(Action.Stay, Action.Busted, mockedHand, mockedHand)).thenReturn(new GameResult(GameOutcome.Player, losingScore, winningScore, dealerHandInfo));
+    public void human_player_busts_dealer_wins() throws OutOfCardsException {
+        when(mockedOps.handleHumanPlayerAction(playerHand, dealerHand)).thenReturn(Action.Busted);
+        GameResult result = game.play();
 
-        GameResultI result = game.play();
+        InOrder order = inOrder(mockedOps, mockedGameResult);
 
-        verify(mockedOps, times(1)).initialGameDeal(any(Hand.class), any(Hand.class));
-        verify(mockedOps, times(1)).handleHumanPlayerAction(any(Hand.class), any(Hand.class));
-        verify(mockedOps, times(1)).handleDealerAction(any(Hand.class), any(Hand.class));
-        verify(mockedGameResult, times(1)).resultOfGame(any(Action.class), any(Action.class), any(Hand.class), any(Hand.class));
+
+        order.verify(mockedOps, times(1)).handleHumanPlayerAction(same(playerHand), same(dealerHand));
+        order.verify(mockedOps, times(0)).handleDealerAction(same(dealerHand), same(playerHand));
+        order.verify(mockedGameResult, times(1)).resultOfGame(any(Action.class), any(Action.class), same(dealerHand), same(playerHand));
     }
 
     @Test
-    public void bot_player_wins_when_human_busts() throws OutOfCardsException {
-        final int bustedScore = 22;
-        when(mockedOps.handleHumanPlayerAction(mockedHand, mockedHand)).thenReturn(Action.Busted);
-        when(mockedGameResult.resultOfGame(Action.Busted, Action.Stay, mockedHand, mockedHand)).thenReturn(new GameResult(GameOutcome.Dealer, winningScore, bustedScore, dealerHandInfo));
+    public void processes_human_player_and_dealer() throws OutOfCardsException {
+        when(mockedOps.handleHumanPlayerAction(playerHand, dealerHand)).thenReturn(Action.Stay);
+        when(mockedOps.handleDealerAction(dealerHand, playerHand)).thenReturn(Action.Stay);
 
-        GameResultI result = game.play();
+        GameResult result = game.play();
 
-        verify(mockedOps, times(1)).initialGameDeal(any(Hand.class), any(Hand.class));
-        verify(mockedOps, times(1)).handleHumanPlayerAction(any(Hand.class), any(Hand.class));
-        verify(mockedOps, times(0)).handleDealerAction(any(Hand.class), any(Hand.class));
-        verify(mockedGameResult, times(1)).resultOfGame(any(Action.class), any(Action.class), any(Hand.class), any(Hand.class));
-    }
+        InOrder order = inOrder(mockedOps);
 
-    @Test
-    public void player_with_greater_score_not_busted_wins() throws OutOfCardsException {
-        when(mockedOps.handleHumanPlayerAction(mockedHand, mockedHand)).thenReturn(Action.Stay).thenReturn(Action.Stay);
-        when(mockedGameResult.resultOfGame(Action.Stay, Action.Stay, mockedHand, mockedHand)).thenReturn(new GameResult(GameOutcome.Player, losingScore, winningScore, dealerHandInfo));
-
-        GameResultI result = game.play();
-
-        verify(mockedOps, times(1)).initialGameDeal(any(Hand.class), any(Hand.class));
-        verify(mockedOps, times(1)).handleHumanPlayerAction(any(Hand.class), any(Hand.class));
-        verify(mockedOps, times(1)).handleDealerAction(any(Hand.class), any(Hand.class));
-        verify(mockedGameResult, times(1)).resultOfGame(any(Action.class), any(Action.class), any(Hand.class), any(Hand.class));
+        order.verify(mockedOps, times(1)).handleHumanPlayerAction(same(playerHand), same(dealerHand));
+        order.verify(mockedOps, times(1)).handleDealerAction(same(dealerHand), same(playerHand));
     }
 }

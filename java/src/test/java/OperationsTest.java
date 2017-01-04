@@ -11,13 +11,13 @@ import static org.mockito.Mockito.*;
 
 public class OperationsTest {
 
-    private DeckI mockedDeck = mock(Deck.class);
-    private HandI mockedHand = mock(Hand.class);
+    private Deck mockedDeck = mock(Deck.class);
+    private Hand mockedHand = mock(Hand.class);
     private HumanPlayer mockedHumanPlayer = mock(HumanPlayer.class);
     private BotPlayer mockedBotPlayer = mock(BotPlayer.class);
     private GameResult mockedScore = mock(GameResult.class);
     private Long mockedTimeValue = 23L;
-    private OperationsI gameOps = Dependencies.gameOps.make();
+    private Operations gameOps = Dependencies.gameOps.make();
 
     @Before
     public void setup() {

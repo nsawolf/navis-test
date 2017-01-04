@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-public class Deck implements DeckI {
+public class Deck {
     public List<Card> cardDeck;
 
     public Deck(){
@@ -19,12 +19,10 @@ public class Deck implements DeckI {
         }
     }
 
-    @Override
     public void shuffleDeck(){
         Collections.shuffle(cardDeck, new Random(Dependencies.now.make()));
     }
 
-    @Override
     public Card dealCard() throws OutOfCardsException {
         if (cardDeck.size() <= 52 && cardDeck.size() > 0){
             Card dealtCard = cardDeck.get(0);
@@ -34,7 +32,6 @@ public class Deck implements DeckI {
        throw new OutOfCardsException("No cards remain in the deck.");
     }
 
-    @Override
     public int size(){
         return cardDeck.size();
     }

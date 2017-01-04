@@ -1,13 +1,11 @@
 import enumerations.Action;
 
-public class BlackJackGame implements BlackJackGameI {
-
-    @Override
-    public GameResultI play() throws OutOfCardsException {
-        GameResultI gameResult = Dependencies.gameResult.make();
-        OperationsI gameOps = Dependencies.gameOps.make();
-        HandI dealer = Dependencies.hand.make();
-        HandI player = Dependencies.hand.make();
+public class BlackJackGame {
+    public GameResult play() throws OutOfCardsException {
+        GameResult gameResult = Dependencies.gameResult.make();
+        Operations gameOps = Dependencies.gameOps.make();
+        Hand player = Dependencies.hand.make();
+        Hand dealer = Dependencies.hand.make();
         Action botAction = Action.Stay;
 
         gameOps.initialGameDeal(dealer, player);

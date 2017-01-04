@@ -4,36 +4,36 @@ import java.util.Date;
 
 
 public class Dependencies {
-    public static final InstanceFactory<BlackJackGameI> game = new InstanceFactory<BlackJackGameI>(new BuildFunction<BlackJackGameI>(){
+    public static final InstanceFactory<BlackJackGame> game = new InstanceFactory<BlackJackGame>(new BuildFunction<BlackJackGame>(){
         @Override
-        public BlackJackGameI build() {
+        public BlackJackGame build() {
             return new BlackJackGame();
         }
     });
     public static final InstanceFactory<ConsoleIOI> console = new InstanceFactory<ConsoleIOI>(BuildFunction.singletonBuilder(ConsoleIO.class));
-    public static final InstanceFactory<DeckI> deck = new InstanceFactory<DeckI>(BuildFunction.singletonBuilder(Deck.class));
-    public static final InstanceFactory<GameResultI> gameResult = new InstanceFactory<GameResultI>(BuildFunction.singletonBuilder(GameResult.class));
-    public static final InstanceFactory<HandI> hand = new InstanceFactory<HandI>(new BuildFunction<HandI>() {
+    public static final InstanceFactory<Deck> deck = new InstanceFactory<Deck>(BuildFunction.singletonBuilder(Deck.class));
+    public static final InstanceFactory<GameResult> gameResult = new InstanceFactory<GameResult>(BuildFunction.singletonBuilder(GameResult.class));
+    public static final InstanceFactory<Hand> hand = new InstanceFactory<Hand>(new BuildFunction<Hand>() {
         @Override
-        public HandI build() {
+        public Hand build() {
             return new Hand();
         }
     });
     public static final InstanceFactory<Long> now = new InstanceFactory<>(() -> new Date(System.currentTimeMillis()).getTime());
-    public static final InstanceFactory<OperationsI> gameOps = new InstanceFactory<OperationsI>(BuildFunction.singletonBuilder(Operations.class));
-    public static final InstanceFactory1Arg<PlayerI, HandI> botPlayer =
-            new InstanceFactory1Arg<PlayerI, HandI>(new BuildFunction1Arg<PlayerI, HandI>() {
+    public static final InstanceFactory<Operations> gameOps = new InstanceFactory<Operations>(BuildFunction.singletonBuilder(Operations.class));
+    public static final InstanceFactory1Arg<PlayerI, Hand> botPlayer =
+            new InstanceFactory1Arg<PlayerI, Hand>(new BuildFunction1Arg<PlayerI, Hand>() {
                 @Override
-                    public PlayerI build(HandI hand) {
+                    public PlayerI build(Hand hand) {
                         if (hand != null)
                             return new BotPlayer(hand);
                         return new BotPlayer(Dependencies.hand.make());
                     }
                 });
-    public static final InstanceFactory1Arg<PlayerI, HandI> humanPlayer =
-            new InstanceFactory1Arg<PlayerI, HandI>(new BuildFunction1Arg<PlayerI, HandI>() {
+    public static final InstanceFactory1Arg<PlayerI, Hand> humanPlayer =
+            new InstanceFactory1Arg<PlayerI, Hand>(new BuildFunction1Arg<PlayerI, Hand>() {
                 @Override
-                public PlayerI build(HandI hand) {
+                public PlayerI build(Hand hand) {
                     if (hand != null){
                         return new HumanPlayer(hand);
                     }

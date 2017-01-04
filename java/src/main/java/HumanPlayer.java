@@ -2,14 +2,14 @@ import enumerations.Action;
 
 public class HumanPlayer implements PlayerI {
 
-    private HandI humanHand = null;
+    private Hand humanHand = null;
 
-    public HumanPlayer(HandI humanHand){
+    public HumanPlayer(Hand humanHand){
         this.humanHand = humanHand;
     }
 
     @Override
-    public Action nextAction(HandI otherHand) {
+    public Action nextAction(Hand otherHand) {
         ConsoleIOI console = Dependencies.console.make();
         PromptI prompt = Dependencies.prompt.make();
         final String question = "Enter h for Hit, s for Stay \n";
@@ -33,7 +33,7 @@ public class HumanPlayer implements PlayerI {
     }
 
     @Override
-    public HandI getHand() {
+    public Hand getHand() {
         return humanHand;
     }
 

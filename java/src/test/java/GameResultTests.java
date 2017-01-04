@@ -14,7 +14,7 @@ public class GameResultTests {
     private final int winningScore = 20;
     private final int losingScore = 17;
     private final String dealerHandInfo = "Dealer Hand";
-    private HandI mockedHand = mock(Hand.class);
+    private Hand mockedHand = mock(Hand.class);
 
 
     @Before
@@ -29,7 +29,7 @@ public class GameResultTests {
 
     @Test
     public void determines_player_as_winner_of_game_when_player_score_is_higher(){
-        GameResultI gameResult = new GameResult();
+        GameResult gameResult = new GameResult();
 
         GameOutcome result = gameResult.determineWinner(losingScore, winningScore);
 
@@ -38,7 +38,7 @@ public class GameResultTests {
 
     @Test
     public void determines_dealer_as_winner_of_game_when_dealer_player_score_is_higher(){
-        GameResultI gameResult = new GameResult();
+        GameResult gameResult = new GameResult();
 
         GameOutcome result = gameResult.determineWinner(winningScore, losingScore);
 
@@ -47,7 +47,7 @@ public class GameResultTests {
 
     @Test
     public void is_push_when_dealer_and_player_have_same_score(){
-        GameResultI gameResult = new GameResult();
+        GameResult gameResult = new GameResult();
 
         boolean result = gameResult.gameIsPush(losingScore, losingScore);
 
@@ -56,7 +56,7 @@ public class GameResultTests {
 
     @Test
     public void both_players_bust_when_each_player_reports_action_busted(){
-        GameResultI gameResult = new GameResult();
+        GameResult gameResult = new GameResult();
 
         boolean result = gameResult.bothPlayersBust(Action.Busted, Action.Busted);
 
@@ -65,24 +65,24 @@ public class GameResultTests {
 
     @Test
     public void resultOfGame_player_with_highest_score_wins_the_game(){
-        GameResultI gameResult = new GameResult();
+        GameResult gameResult = new GameResult();
         String expected = new GameResult(GameOutcome.Player, losingScore, winningScore, dealerHandInfo).toString();
         when(mockedHand.scoreHand()).thenReturn(losingScore).thenReturn(winningScore);
         when(mockedHand.visibleHand(false)).thenReturn(dealerHandInfo);
 
-        GameResultI result = gameResult.resultOfGame(Action.Stay, Action.Stay, mockedHand, mockedHand);
+        GameResult result = gameResult.resultOfGame(Action.Stay, Action.Stay, mockedHand, mockedHand);
 
         assertEquals(expected, result.toString());
     }
 
     @Test
     public void resultOfGame_dealer_with_highest_score_wins_the_game(){
-        GameResultI gameResult = new GameResult();
+        GameResult gameResult = new GameResult();
         final String expected = new GameResult(GameOutcome.Dealer, winningScore, losingScore, dealerHandInfo).toString();
         when(mockedHand.scoreHand()).thenReturn(winningScore).thenReturn(losingScore);
         when(mockedHand.visibleHand(false)).thenReturn(dealerHandInfo);
 
-        GameResultI result = gameResult.resultOfGame(Action.Stay, Action.Stay, mockedHand, mockedHand);
+        GameResult result = gameResult.resultOfGame(Action.Stay, Action.Stay, mockedHand, mockedHand);
 
         assertEquals(expected, result.toString());
     }
@@ -96,7 +96,7 @@ public class GameResultTests {
         when(mockedHand.scoreHand()).thenReturn(dealerScore).thenReturn(playerScore);
         when(mockedHand.visibleHand(false)).thenReturn(dealerHandInfo);
 
-        GameResultI result = gameResult.resultOfGame(Action.Busted, Action.Busted, mockedHand, mockedHand);
+        GameResult result = gameResult.resultOfGame(Action.Busted, Action.Busted, mockedHand, mockedHand);
 
         assertEquals(expected, result.toString());
     }
@@ -108,7 +108,7 @@ public class GameResultTests {
         when(mockedHand.scoreHand()).thenReturn(20);
         when(mockedHand.visibleHand(false)).thenReturn(dealerHandInfo);
 
-        GameResultI result = gameResult.resultOfGame(Action.Stay, Action.Stay, mockedHand, mockedHand);
+        GameResult result = gameResult.resultOfGame(Action.Stay, Action.Stay, mockedHand, mockedHand);
 
         assertEquals(expected, result.toString());
     }

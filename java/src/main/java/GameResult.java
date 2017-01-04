@@ -4,7 +4,7 @@ import enumerations.Rank;
 
 import java.util.Set;
 
-public class GameResult implements GameResultI {
+public class GameResult {
 
     private String gameResultString = null;
     public GameResult(){}
@@ -13,10 +13,9 @@ public class GameResult implements GameResultI {
         this.gameResultString = gameOutcome.asString(dealerScore, playerScore, showDealerHand);
     }
 
-    @Override
     public GameOutcome determineWinner(int dealerScore, int playerScore){
         final int blackJackWin = 21;
-        boolean playerBusted = playerScore > blackJackWin;
+        boolean playerBusted = playerScore > blackJackWin; // TODO: naming. Try to avoid abbreviations
         boolean dealerBusted = dealerScore > blackJackWin;
         boolean playerWon = playerScore > dealerScore || dealerBusted;
         boolean dealerWon = dealerScore > playerScore || playerBusted;
@@ -29,8 +28,7 @@ public class GameResult implements GameResultI {
         return null;
     }
 
-    @Override
-    public GameResult resultOfGame(Action humanAction, Action botAction, HandI dealerHand, HandI playerHand) {
+    public GameResult resultOfGame(Action humanAction, Action botAction, Hand dealerHand, Hand playerHand) {
         int dealerScore = dealerHand.scoreHand();
         int playerScore = playerHand.scoreHand();
         String showDealerHand = dealerHand.visibleHand(false);
@@ -45,12 +43,10 @@ public class GameResult implements GameResultI {
         return new GameResult(winner, dealerScore, playerScore, showDealerHand);
     }
 
-    @Override
     public boolean gameIsPush(int dealerScore, int playerScore) {
         return dealerScore == playerScore;
     }
 
-    @Override
     public boolean bothPlayersBust(Action playerAction, Action otherAction){
         return playerAction.equals(Action.Busted) && otherAction.equals(Action.Busted);
     }

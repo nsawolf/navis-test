@@ -10,7 +10,7 @@ public class MainGuyTests {
 
     private BlackJackGame mockedGame = mock(BlackJackGame.class);
     private ConsoleIO mockedConsole = mock(ConsoleIO.class);
-    private GameResultI mockedGameResult = mock(GameResult.class);
+    private GameResult mockedGameResult = mock(GameResult.class);
     private MainGuy m = new MainGuy();
 
     @Before

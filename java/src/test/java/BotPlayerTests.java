@@ -1,20 +1,15 @@
 import enumerations.Action;
-import enumerations.Rank;
-import enumerations.Suit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.beans.DefaultPersistenceDelegate;
-import java.util.HashSet;
-import java.util.Set;
-
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.*;
 
 public class BotPlayerTests {
 
-    private HandI mockedHand = spy(Hand.class);
+    private Hand mockedHand = mock(Hand.class);
 
 
     @Before
@@ -80,8 +75,9 @@ public class BotPlayerTests {
         assertEquals(Action.Hit, result);
     }
 
+    // TODO: shows_visible_hand_with_no_cards_hidden ... Game being over has nothing to do with behavior
     @Test
-    public void showHand_reveals_all_cards_in_hand_when_game_over(){
+    public void shows_visible_hand_with_no_cards_hidden() {
         final String dealerHand = "eight, jack";
         PlayerI dealer = new BotPlayer(mockedHand);
         when(mockedHand.visibleHand(false)).thenReturn(dealerHand);
@@ -89,16 +85,13 @@ public class BotPlayerTests {
         String result = dealer.showHand();
 
         assertEquals(dealerHand, result);
-        verify(mockedHand, times(1)).visibleHand(false);
     }
 
     @Test
-    public void getHand_contains_dealer_hand(){
-        final Card jack = new Card(Suit.Clubs, Rank.Jack);
-        mockedHand.addCard(jack);
+    public void getHand_gives_back_the_dealer_hand(){
         PlayerI dealer = new BotPlayer(mockedHand);
-        HandI hand = dealer.getHand();
-        assertEquals(hand.size(), 1);
+        Hand hand = dealer.getHand();
+        assertSame(hand, mockedHand);
     }
 
 }

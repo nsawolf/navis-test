@@ -2,9 +2,9 @@ import enumerations.Action;
 
 public interface PlayerI {
 
-    Action nextAction(HandI otherHand);
+    Action nextAction(Hand otherHand);
 
-    HandI getHand();
+    Hand getHand();
 
     String showHand();
 

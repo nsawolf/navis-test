@@ -8,8 +8,8 @@ public class MainGuy {
         console.generateConsoleOutput("Let us begin the game.\n  Cards have been shuffled and dealt.\n");
         try {
             do {
-                BlackJackGameI game = Dependencies.game.make();
-                GameResultI result = game.play();
+                BlackJackGame game = Dependencies.game.make();
+                GameResult result = game.play();
                 console.generateConsoleOutput(result.toString());
                 console.generateConsoleOutput("Would you like to play again? \n Enter y to play again anything else ends the game. \n");
             } while (console.getConsoleInput().equals(playAgain));

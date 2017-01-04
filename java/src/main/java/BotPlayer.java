@@ -4,14 +4,14 @@ import java.util.Set;
 
 public class BotPlayer implements PlayerI {
 
-    private HandI dealerHand = null;
+    private Hand dealerHand = null;
 
-    public BotPlayer(HandI dealerHand){
+    public BotPlayer(Hand dealerHand){
         this.dealerHand = dealerHand;
     }
 
     @Override
-    public Action nextAction(HandI otherHand) {
+    public Action nextAction(Hand otherHand) {
         final int stayScore = 16;
         final int blackJackScore = 21;
 
@@ -26,7 +26,7 @@ public class BotPlayer implements PlayerI {
     }
 
     @Override
-    public HandI getHand() {
+    public Hand getHand() {
         return dealerHand;
     }
 
