@@ -27,22 +27,21 @@ public class PromptTests {
     }
 
     @Test
-    public void asks_question_until_legal_reponse_is_received() throws IOException {
-        final String illegal = "not legal";
-        final String variableInput = "another guy";
-        final String testResponse = "test";
-        final String testPattern = "test";
+    public void re_asks_question_when_fails_to_match_pattern() throws IOException {
+        final String illegalResponse = "not legal";
+        final String legalResponse = "test";
+        final String pattern = "test";
         PromptI prompt = Dependencies.prompt.make();
-        when(console.getConsoleInput()).thenReturn(illegal).thenReturn(variableInput).thenReturn(testResponse);
+        when(console.getConsoleInput()).thenReturn(illegalResponse).thenReturn(illegalResponse).thenReturn(legalResponse);
 
-        String result = prompt.prompt(testQuestion, testPattern, defaultResponse);
+        String result = prompt.prompt(testQuestion, pattern, defaultResponse);
 
         verify(console, times(2)).generateConsoleOutput(anyString());
         verify(console, times(3)).getConsoleInput();
     }
 
     @Test
-    public void empty_response_returns_the_default_response() throws IOException {
+    public void when_console_throws_exception_returns_default_response() throws IOException {
         final String emptyResponse = "";
         PromptI prompt = Dependencies.prompt.make();
         when(console.getConsoleInput()).thenReturn(emptyResponse);
@@ -53,7 +52,7 @@ public class PromptTests {
     }
 
     @Test
-    public void returns_valid_response_with_whitespace_trimmed() throws IOException {
+    public void prompt_trims_whitespace_from_response() throws IOException {
         final String whiteSpacedValue = "  trim whitespaces off  ";
         PromptI prompt = Dependencies.prompt.make();
         when(console.getConsoleInput()).thenReturn(whiteSpacedValue);
